@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Willis HashVault - Cloud Bitcoin Mining</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{--bg:#080b12;--bg2:#0e1420;--bg3:#151d2e;--card:rgba(21,29,46,0.7);--bdr:rgba(79,158,255,0.12);--bh:rgba(79,158,255,0.35);--t1:#f0f4ff;--t2:#8899bb;--t3:#4a5568;--p:#4f9eff;--pl:#7bb8ff;--g:#00d4a1;--r:#ff4d6d;--o:#ffb347;--gold:#ffd700;--gp:linear-gradient(135deg,#4f9eff,#00d4a1);--gp2:linear-gradient(135deg,#4f9eff,#7b5ea7);--rf:9999px;--rm:12px;--rl:18px;--rxl:24px;--fs:'Space Grotesk',sans-serif;--fm:'Space Mono',monospace}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--fs);background:var(--bg);color:var(--t1);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+.hidden{display:none!important}
+.w-full{width:100%}
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+.gt{background:var(--gp);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 24px;border-radius:var(--rf);font-weight:700;font-size:14px;transition:all 0.25s;white-space:nowrap;font-family:var(--fs)}
+.btn-primary{background:var(--gp);color:#000;box-shadow:0 4px 20px rgba(79,158,255,0.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(79,158,255,0.5)}
+.btn-ghost{background:transparent;color:var(--t2);border:1px solid rgba(255,255,255,0.12)}
+.btn-ghost:hover{background:rgba(255,255,255,0.06);color:var(--t1)}
+.btn-outline{background:transparent;color:var(--p);border:1px solid var(--p)}
+.btn-outline:hover{background:var(--p);color:#000}
+.btn-danger{background:var(--r);color:#fff}
+.btn-sm{padding:7px 16px;font-size:13px}
+.btn-lg{padding:16px 36px;font-size:16px}
+.btn:disabled{opacity:0.6;cursor:not-allowed;transform:none!important}
+.fg{margin-bottom:18px}
+.fl{display:block;font-size:12px;font-weight:700;color:var(--t2);margin-bottom:7px;text-transform:uppercase;letter-spacing:0.06em}
+.fi,.fsel{width:100%;padding:13px 16px;background:var(--bg2);border:1px solid rgba(255,255,255,0.1);border-radius:var(--rm);color:var(--t1);font-size:14px;transition:all 0.25s;font-family:var(--fs)}
+.fi:focus,.fsel:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px rgba(79,158,255,0.1)}
+.fi::placeholder{color:var(--t3)}
+.sw{position:relative}
+.fsel{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:40px}
+.sa{position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--t3)}
+.irow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ia{position:relative}
+.ia .fi{padding-right:72px}
+.iad{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(79,158,255,0.15);color:var(--pl);padding:4px 12px;border-radius:var(--rm);font-size:12px;font-weight:700;cursor:pointer}
+.err-msg{font-size:13px;color:var(--r);margin-bottom:14px;padding:10px 14px;background:rgba(255,77,109,0.1);border-radius:var(--rm);display:none}
+.err-msg.show{display:block}
+/* COOKIE */
+#cookie{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:580px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl);padding:16px 20px;z-index:800;display:flex;align-items:center;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,0.5);transition:all 0.4s}
+#cookie.gone{transform:translateX(-50%) translateY(140px);opacity:0;pointer-events:none}
+.ck-txt{flex:1;font-size:13px;color:var(--t2)}
+.ck-txt a{color:var(--p)}
+.ck-btns{display:flex;gap:8px;flex-shrink:0}
+/* PRICE BAR */
+.pbar{background:var(--bg2);border-bottom:1px solid var(--bdr);padding:7px 0;overflow:hidden}
+.pbar-inner{display:flex;animation:pbroll 28s linear infinite;width:max-content}
+.pi{display:inline-flex;align-items:center;gap:8px;padding:0 24px;font-size:12px;border-right:1px solid rgba(255,255,255,0.05)}
+.pi-sym{color:var(--t3);font-weight:700;font-family:var(--fm)}
+.pi-px{color:var(--t1);font-weight:700;font-family:var(--fm)}
+.pi-ch{font-size:11px;padding:2px 7px;border-radius:var(--rf);font-weight:700}
+.pi-ch.up{color:var(--g);background:rgba(0,212,161,0.1)}
+.pi-ch.dn{color:var(--r);background:rgba(255,77,109,0.1)}
+@keyframes pbroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+/* NAVBAR */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:900;transition:all 0.3s;padding:0 24px;margin-top:33px}
+.navbar.scrolled{background:rgba(8,11,18,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);margin-top:0}
+.navc{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:66px}
+.nbrand{display:flex;align-items:center;gap:10px;cursor:pointer}
+.nlogo{width:36px;height:36px;background:var(--gp);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#000;flex-shrink:0}
+.ntxt{font-size:13px;font-weight:800;color:var(--t1);letter-spacing:-0.01em;line-height:1.1}
+.ntxt span{display:block;font-size:9px;font-weight:600;color:var(--p);letter-spacing:0.1em;text-transform:uppercase}
+.nlinks{display:flex;align-items:center;gap:28px}
+.nlink{font-size:14px;font-weight:600;color:var(--t2);transition:color 0.2s}
+.nlink:hover{color:var(--t1)}
+.nright{display:flex;align-items:center;gap:8px}
+.iconbtn{width:36px;height:36px;border-radius:var(--rm);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;color:var(--t2);transition:all 0.2s;position:relative;cursor:pointer}
+.iconbtn:hover{background:rgba(255,255,255,0.1);color:var(--t1)}
+.ndot{position:absolute;top:5px;right:5px;width:8px;height:8px;background:var(--r);border-radius:50%;border:2px solid var(--bg);display:none}
+.npanel{position:absolute;top:calc(100% + 10px);right:0;width:320px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl);box-shadow:0 20px 60px rgba(0,0,0,0.5);z-index:500;opacity:0;visibility:hidden;transform:translateY(8px);transition:all 0.25s;overflow:hidden}
+.npanel.open{opacity:1;visibility:visible;transform:translateY(0)}
+.nph{padding:14px 18px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:14px}
+.npi{padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:10px;cursor:pointer;transition:background 0.2s}
+.npi:hover{background:rgba(255,255,255,0.03)}
+.npi:last-child{border-bottom:none}
+.npi-ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.npi-t{font-size:13px;font-weight:600;margin-bottom:2px}
+.npi-m{font-size:11px;color:var(--t3)}
+.npi-dot{width:7px;height:7px;background:var(--p);border-radius:50%;margin-top:4px;flex-shrink:0}
+.mob-btn{display:none;color:var(--t1);padding:8px}
+.mob-menu{display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg2);border-bottom:1px solid var(--bdr);padding:18px 24px;flex-direction:column;gap:12px}
+.mob-link{font-size:15px;color:var(--t2);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-weight:600}
+/* NET STATS */
+.netbar{border-bottom:1px solid var(--bdr);padding:9px 0;margin-top:33px}
+.nbi{display:flex;justify-content:center;gap:36px;flex-wrap:wrap}
+.nb-it{display:flex;align-items:center;gap:8px;font-size:12px}
+.nb-lbl{color:var(--t3);font-weight:600}
+.nb-val{color:var(--t1);font-weight:700;font-family:var(--fm)}
+.nb-val.grn{color:var(--g)}
+.nb-val.blu{color:var(--p)}
+/* HERO */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:160px 24px 80px;overflow:hidden}
+.gorb{position:absolute;border-radius:50%;filter:blur(100px);opacity:0.12;pointer-events:none}
+.gorb1{width:600px;height:600px;background:var(--p);top:-10%;left:-10%;animation:gop 6s ease-in-out infinite}
+.gorb2{width:500px;height:500px;background:var(--g);bottom:-10%;right:-10%;animation:gop 6s ease-in-out infinite 2s}
+@keyframes gop{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.hero-content{position:relative;z-index:10;max-width:940px;text-align:center;width:100%}
+.tbadge{display:inline-flex;align-items:center;gap:10px;background:rgba(79,158,255,0.1);border:1px solid rgba(79,158,255,0.25);padding:8px 20px;border-radius:var(--rf);font-size:13px;color:var(--t2);margin-bottom:28px}
+.pdot{width:8px;height:8px;background:var(--g);border-radius:50%;animation:pdp 2s infinite;flex-shrink:0}
+@keyframes pdp{0%,100%{opacity:1}50%{opacity:0.3}}
+.hero-title{font-size:clamp(36px,6vw,72px);font-weight:800;line-height:1.08;margin-bottom:20px;letter-spacing:-0.03em}
+.hero-sub{font-size:17px;color:var(--t2);max-width:560px;margin:0 auto 40px;line-height:1.75}
+.calccard{background:rgba(14,20,32,0.9);backdrop-filter:blur(20px);border:1px solid var(--bdr);border-radius:var(--rxl);padding:28px;text-align:left}
+.calcgrid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.plan-btns{display:flex;flex-direction:column;gap:8px}
+.plan-btn{display:block;width:100%;padding:12px 15px;background:var(--bg3);border:1px solid rgba(255,255,255,0.07);border-radius:var(--rm);text-align:left;transition:all 0.25s;cursor:pointer}
+.plan-btn:hover,.plan-btn.active{border-color:var(--p);background:rgba(79,158,255,0.08)}
+.pmain{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.pbtc{font-family:var(--fm);font-weight:700;color:var(--t1);font-size:13px}
+.proi{font-size:11px;color:var(--g);font-weight:700}
+.pfiat{font-size:12px;color:var(--t3)}
+.mbox{background:var(--bg3);border:1px solid rgba(255,255,255,0.07);border-radius:var(--rl);padding:22px;text-align:center;margin-bottom:14px}
+.bigtimer{font-family:var(--fm);font-size:34px;font-weight:700;color:var(--t1);margin-bottom:8px}
+.stxt{font-size:12px;color:var(--t2);margin-bottom:16px}
+.ministats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ms{background:rgba(255,255,255,0.03);border-radius:var(--rm);padding:12px;text-align:center}
+.ms-val{font-family:var(--fm);font-size:18px;font-weight:700;color:var(--g);margin-bottom:2px}
+.ms-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.05em}
+.hashstream{font-family:var(--fm);font-size:9px;color:var(--p);opacity:0.6;background:rgba(79,158,255,0.04);border-radius:8px;padding:8px;height:38px;overflow:hidden;line-height:1.4;word-break:break-all;margin-top:10px;border:1px solid rgba(79,158,255,0.08)}
+.hero-stats{display:flex;justify-content:center;gap:32px;margin-top:32px;flex-wrap:wrap}
+.hs-item{text-align:center}
+.hs-val{font-size:24px;font-weight:800;letter-spacing:-0.02em}
+.hs-lbl{font-size:11px;color:var(--t3);margin-top:2px;text-transform:uppercase;letter-spacing:0.05em}
+.hs-div{width:1px;background:rgba(255,255,255,0.08)}
+/* SECTIONS */
+.section{padding:90px 0}
+.sh{text-align:center;max-width:600px;margin:0 auto 56px}
+.stag{font-size:11px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:10px}
+.stitle{font-size:clamp(26px,4vw,40px);font-weight:800;margin-bottom:12px;letter-spacing:-0.02em}
+.ssub{font-size:15px;color:var(--t2);line-height:1.75}
+.altbg{background:rgba(14,20,32,0.5)}
+/* FEATURES */
+.featgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.feat{background:var(--card);border:1px solid var(--bdr);border-radius:var(--rl);padding:26px;transition:all 0.3s;backdrop-filter:blur(10px)}
+.feat:hover{transform:translateY(-4px);border-color:var(--bh);box-shadow:0 12px 40px rgba(79,158,255,0.1)}
+.fic{width:42px;height:42px;border-radius:var(--rm);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.ft{font-size:16px;font-weight:700;margin-bottom:7px}
+.fd{font-size:13px;color:var(--t2);line-height:1.7}
+/* STEPS */
+.stepgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.step{background:var(--card);border:1px solid var(--bdr);border-radius:var(--rl);padding:26px;text-align:center;transition:all 0.3s}
+.step:hover{transform:translateY(-3px);border-color:var(--bh)}
+.snum{width:48px;height:48px;border-radius:var(--rm);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#000;margin:0 auto 14px;background:var(--gp)}
+/* TICKER */
+.tsec{border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);padding:28px 0;overflow:hidden}
+.tlbl{text-align:center;font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:14px}
+.twrap{overflow:hidden;position:relative}
+.twrap::before,.twrap::after{content:'';position:absolute;top:0;bottom:0;width:80px;z-index:2;pointer-events:none}
+.twrap::before{left:0;background:linear-gradient(to right,var(--bg),transparent)}
+.twrap::after{right:0;background:linear-gradient(to left,var(--bg),transparent)}
+.ticker{display:flex;gap:10px;animation:tkr 36s linear infinite;width:max-content}
+@keyframes tkr{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tki{display:inline-flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--rf);padding:8px 16px;white-space:nowrap}
+.tkamt{font-family:var(--fm);font-weight:700;color:var(--g);font-size:12px}
+.tkhash{font-size:10px;color:var(--t3)}
+.tkbadge{font-size:10px;color:var(--p);background:rgba(79,158,255,0.1);padding:2px 9px;border-radius:var(--rf)}
+/* PROFIT CALC */
+.pc-card{max-width:800px;margin:0 auto;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rxl);padding:36px}
+.pcgrid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+.pcslider{width:100%;height:6px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,0.1);border-radius:var(--rf);outline:none}
+.pcslider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--gp);border-radius:50%;cursor:pointer;box-shadow:0 0 10px rgba(79,158,255,0.5)}
+.pcresults{background:var(--bg2);border-radius:var(--rl);padding:20px}
+.pcrow{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px}
+.pcrow:last-child{border-bottom:none}
+.pcrow.big{font-weight:800;font-size:16px;border-top:1px solid rgba(255,255,255,0.1);margin-top:8px;padding-top:14px}
+.pcval{color:var(--t1);font-weight:600}
+.pcval.grn{color:var(--g)}
+.pcval.big{color:var(--g);font-size:22px}
+.sval{color:var(--p);font-weight:700}
+/* TESTIMONIALS */
+.testgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.testcard{background:var(--card);border:1px solid var(--bdr);border-radius:var(--rl);padding:24px;transition:all 0.3s}
+.testcard:hover{border-color:var(--bh);transform:translateY(-2px)}
+.stars{color:var(--gold);font-size:14px;margin-bottom:12px}
+.testtxt{font-size:13px;color:var(--t2);line-height:1.75;margin-bottom:16px;font-style:italic}
+.testau{display:flex;align-items:center;gap:10px}
+.taav{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#000;flex-shrink:0}
+.tanm{font-weight:700;font-size:13px}
+.tameta{font-size:11px;color:var(--t3)}
+.taver{font-size:10px;color:var(--g);background:rgba(0,212,161,0.1);padding:2px 7px;border-radius:var(--rf);margin-left:5px}
+/* PRICING */
+.pricegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;max-width:980px;margin:0 auto}
+.pricecard{background:var(--card);border:1px solid var(--bdr);border-radius:var(--rxl);padding:28px;position:relative;transition:all 0.3s}
+.pricecard:hover{transform:translateY(-4px)}
+.pricecard.pop{border-color:var(--p);box-shadow:0 0 40px rgba(79,158,255,0.15)}
+.popbadge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--gp);color:#000;font-size:11px;font-weight:800;padding:4px 14px;border-radius:var(--rf);letter-spacing:0.05em}
+.pcname{font-size:18px;font-weight:800;margin-bottom:8px}
+.pcprice{margin-bottom:6px}
+.pn{font-size:38px;font-weight:800}
+.pp{font-size:14px;color:var(--t3)}
+.pcdesc{font-size:12px;color:var(--t2);margin-bottom:20px}
+.pcfeats{list-style:none;margin-bottom:22px}
+.pcfeats li{display:flex;align-items:center;gap:8px;padding:8px 0;font-size:13px;color:var(--t2);border-bottom:1px solid rgba(255,255,255,0.03)}
+.pcfeats li:last-child{border-bottom:none}
+/* FAQ */
+.faqlist{max-width:780px;margin:0 auto}
+.faqitem{background:var(--card);border:1px solid var(--bdr);border-radius:var(--rm);margin-bottom:8px;overflow:hidden;transition:all 0.3s}
+.faqitem:hover{border-color:var(--bh)}
+.faqq{width:100%;display:flex;justify-content:space-between;align-items:center;padding:18px 22px;font-size:14px;font-weight:700;color:var(--t1);text-align:left;transition:all 0.2s;cursor:pointer}
+.faqarr{color:var(--t3);transition:transform 0.3s;flex-shrink:0}
+.faqitem.open .faqarr{transform:rotate(180deg)}
+.faqa{padding:0 22px 18px;color:var(--t2);font-size:13px;line-height:1.75;display:none}
+.faqitem.open .faqa{display:block}
+/* CTA */
+.ctasec{position:relative;padding:110px 24px;overflow:hidden;text-align:center}
+.ctaorb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;height:700px;background:var(--p);border-radius:50%;filter:blur(140px);opacity:0.06;pointer-events:none}
+.ctacnt{position:relative;z-index:1;max-width:600px;margin:0 auto}
+.ctatitle{font-size:clamp(28px,5vw,48px);font-weight:800;margin-bottom:16px;letter-spacing:-0.02em}
+.ctasub{font-size:16px;color:var(--t2);margin-bottom:28px;line-height:1.75}
+/* FOOTER */
+.footer{background:rgba(14,20,32,0.8);border-top:1px solid var(--bdr);padding:56px 0 24px}
+.footgrid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.ftbrand p{font-size:13px;color:var(--t3);margin-top:12px;line-height:1.7;max-width:240px}
+.ftcol h4{font-size:11px;font-weight:700;color:var(--t1);margin-bottom:16px;text-transform:uppercase;letter-spacing:0.1em}
+.ftcol a{display:block;font-size:13px;color:var(--t3);padding:4px 0;transition:color 0.2s}
+.ftcol a:hover{color:var(--t1)}
+.ftbot{display:flex;justify-content:space-between;align-items:center;padding-top:22px;border-top:1px solid var(--bdr);font-size:12px;color:var(--t3)}
+.socials{display:flex;gap:12px}
+.socials a{color:var(--t3);transition:color 0.2s;padding:4px}
+.socials a:hover{color:var(--t1)}
+/* MODALS */
+.mov{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(12px);z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;visibility:hidden;transition:all 0.3s}
+.mov.active{opacity:1;visibility:visible}
+.modal{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rxl);width:100%;max-width:440px;max-height:90vh;overflow-y:auto;position:relative;transform:scale(0.94) translateY(20px);transition:all 0.3s}
+.mov.active .modal{transform:scale(1) translateY(0)}
+.modal-lg{max-width:520px}
+.mclose{position:absolute;top:13px;right:13px;color:var(--t3);font-size:16px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,0.06);transition:all 0.2s;z-index:5;cursor:pointer}
+.mclose:hover{color:var(--t1);background:rgba(255,255,255,0.12)}
+.mbody{padding:36px 28px 28px}
+.mtitle{font-size:22px;font-weight:800;margin-bottom:5px}
+.msub{font-size:13px;color:var(--t2);margin-bottom:22px}
+.mfoot{text-align:center;margin-top:18px;font-size:13px;color:var(--t3)}
+.mfoot a{color:var(--p);font-weight:700}
+/* UPGRADE */
+.upsteps{display:flex;justify-content:center;gap:4px;margin-bottom:22px}
+.ups{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t3);font-weight:600}
+.ups.act{color:var(--p)}
+.ups.done{color:var(--g)}
+.upsn{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;transition:all 0.3s}
+.ups.act .upsn{background:var(--p);color:#000}
+.ups.done .upsn{background:var(--g);color:#000}
+.upsline{width:28px;height:2px;background:rgba(255,255,255,0.08);margin:0 2px}
+.planpicker{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.ppc{padding:14px;background:var(--bg);border:1px solid rgba(255,255,255,0.08);border-radius:var(--rm);cursor:pointer;transition:all 0.25s;text-align:center}
+.ppc:hover,.ppc.sel{border-color:var(--p);background:rgba(79,158,255,0.07)}
+.ppn{font-weight:700;font-size:13px;margin-bottom:3px}
+.ppp{font-size:20px;font-weight:800;color:var(--p)}
+.ppr{font-size:11px;color:var(--t3);margin-top:3px}
+.cardflds{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* QR */
+.qrwrap{background:white;width:160px;height:160px;border-radius:var(--rm);margin:0 auto 14px;display:flex;align-items:center;justify-content:center}
+.qraddr{font-family:var(--fm);font-size:10px;color:var(--t2);word-break:break-all;text-align:center;padding:10px;background:var(--bg);border-radius:var(--rm);margin-bottom:12px}
+.copybtn{display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:600;color:var(--p);background:rgba(79,158,255,0.1);padding:9px 16px;border-radius:var(--rf);margin:0 auto;width:fit-content;cursor:pointer;transition:all 0.2s}
+.copybtn:hover{background:rgba(79,158,255,0.2)}
+/* 2FA */
+.otprow{display:flex;gap:8px;justify-content:center;margin:18px 0}
+.otpin{width:44px;height:52px;border:1px solid rgba(255,255,255,0.15);border-radius:var(--rm);background:var(--bg);color:var(--t1);font-size:22px;font-weight:700;text-align:center;font-family:var(--fm);transition:all 0.2s}
+.otpin:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px rgba(79,158,255,0.12)}
+/* SIDEBAR */
+.sidebar{width:260px;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;transition:transform 0.3s}
+.sdbrand{padding:20px;border-bottom:1px solid var(--bdr)}
+.sdnav{flex:1;padding:12px 8px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.sl{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:var(--rm);font-size:13px;font-weight:600;color:var(--t2);transition:all 0.25s;cursor:pointer}
+.sl:hover{background:rgba(79,158,255,0.08);color:var(--t1)}
+.sl.active{background:rgba(79,158,255,0.15);color:var(--p)}
+.sl .badge{margin-left:auto;background:var(--r);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:var(--rf)}
+.sdsec{padding:5px 13px 3px;font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.1em;margin-top:6px}
+.sdfooter{padding:12px;border-top:1px solid var(--bdr)}
+.ucard{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:9px;background:rgba(255,255,255,0.03);border-radius:var(--rm)}
+.uav{width:36px;height:36px;background:var(--gp);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#000;font-size:13px;flex-shrink:0}
+.unm{font-weight:700;font-size:13px}
+.upl{font-size:10px;color:var(--t3)}
+.planchip{display:inline-flex;align-items:center;gap:3px;background:rgba(79,158,255,0.15);color:var(--p);padding:2px 7px;border-radius:var(--rf);font-size:9px;font-weight:700;text-transform:uppercase}
+.sdtoggle{display:none;position:fixed;top:14px;left:14px;z-index:101;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rm);padding:9px;color:var(--t1);cursor:pointer}
+.main{flex:1;margin-left:260px;padding:26px;min-height:100vh}
+/* DASH */
+.dsec{display:none;animation:dfade 0.3s ease}
+.dsec.active{display:block}
+@keyframes dfade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.dh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px}
+.dh-l h1{font-size:24px;font-weight:800;letter-spacing:-0.02em}
+.dh-l p{color:var(--t3);font-size:13px;margin-top:3px}
+.dh-r{display:flex;gap:8px;flex-wrap:wrap}
+.srow{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:18px}
+.sbox{background:var(--card);border:1px solid var(--bdr);border-radius:var(--rl);padding:20px;display:flex;align-items:flex-start;gap:13px;transition:all 0.3s}
+.sbox:hover{border-color:var(--bh);transform:translateY(-2px)}
+.sboxic{width:42px;height:42px;border-radius:var(--rm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sboxlbl{font-size:11px;color:var(--t3);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.05em}
+.sboxval{font-size:20px;font-weight:800;margin-bottom:3px}
+.sboxch{font-size:11px;color:var(--t3)}
+.sboxch.pos{color:var(--g)}
+.dc{background:var(--card);border:1px solid var(--bdr);border-radius:var(--rl);margin-bottom:16px;overflow:hidden}
+.dch{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.05)}
+.dcht{font-size:14px;font-weight:700}
+.tabrow{display:flex;gap:3px}
+.tb{padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;color:var(--t3);transition:all 0.25s;cursor:pointer}
+.tb:hover,.tb.active{background:rgba(79,158,255,0.12);color:var(--p)}
+.cw{padding:20px;height:280px;position:relative}
+.cwsm{padding:20px;height:200px;position:relative}
+.actlist{padding:12px 20px}
+.actitem{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.actitem:last-child{border-bottom:none}
+.actic{width:36px;height:36px;border-radius:var(--rm);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700}
+.acttitle{font-weight:600;font-size:13px;margin-bottom:2px}
+.actmeta{font-size:11px;color:var(--t3)}
+.actamt{font-family:var(--fm);font-weight:700;font-size:13px;white-space:nowrap}
+.actamt.pos{color:var(--g)}
+.actamt.neg{color:var(--r)}
+.minelayout{display:grid;grid-template-columns:1fr 330px;gap:16px}
+.mineform{padding:20px}
+.mslider{width:100%;height:6px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,0.1);border-radius:var(--rf);outline:none}
+.mslider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--gp);border-radius:50%;cursor:pointer}
+.sumbox{background:rgba(255,255,255,0.03);border-radius:var(--rm);padding:16px;margin:16px 0}
+.sumrow{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:var(--t2);border-bottom:1px solid rgba(255,255,255,0.03)}
+.sumrow:last-child{border-bottom:none}
+.sumrow.tot{font-weight:700;color:var(--t1);font-size:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1)}
+.sumval{color:var(--t1);font-weight:600}
+.livepanel{padding:16px 20px}
+.lptime{text-align:center;padding:14px 0 18px}
+.lptime p{font-size:11px;color:var(--t3);margin-top:3px}
+.prog-r{margin-bottom:12px}
+.prog-l{font-size:11px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em}
+.prog-b{height:6px;background:rgba(255,255,255,0.06);border-radius:var(--rf);overflow:hidden}
+.prog-f{height:100%;background:var(--gp);border-radius:var(--rf);transition:width 0.4s}
+.prog-v{font-size:11px;color:var(--t1);font-weight:600;margin-top:3px}
+.animhash{font-family:var(--fm);font-size:9px;color:var(--g);opacity:0.7;background:rgba(0,212,161,0.04);border-radius:8px;padding:9px;height:48px;overflow:hidden;line-height:1.4;word-break:break-all;margin-top:12px;border:1px solid rgba(0,212,161,0.08)}
+.walletlayout{display:grid;grid-template-columns:1fr 340px;gap:16px}
+.balcard{padding:24px}
+.ballbl{font-size:11px;color:var(--t3);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.08em}
+.balamt{font-size:30px;font-weight:800;margin-bottom:3px}
+.balbtc{font-family:var(--fm);font-size:12px;color:var(--t3)}
+.aitem{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:1px solid rgba(255,255,255,0.03)}
+.aitem:last-child{border-bottom:none}
+.aiinfo{display:flex;align-items:center;gap:11px}
+.aiic{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.ainm{font-weight:700;font-size:13px}
+.aisym{font-size:10px;color:var(--t3)}
+.aibal{text-align:right}
+.aiamt{font-family:var(--fm);font-weight:600;font-size:13px}
+.aiusd{font-size:11px;color:var(--t3)}
+.witem{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid rgba(255,255,255,0.03)}
+.witem:last-child{border-bottom:none}
+.waddr{font-family:var(--fm);font-size:10px;color:var(--t3)}
+.chip{display:inline-flex;align-items:center;padding:3px 9px;border-radius:var(--rf);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em}
+.chg{background:rgba(0,212,161,0.1);color:var(--g)}
+.chb{background:rgba(79,158,255,0.1);color:var(--p)}
+.chr{background:rgba(255,77,109,0.1);color:var(--r)}
+.chm{background:rgba(100,116,139,0.1);color:var(--t2)}
+.txwrap{overflow-x:auto}
+.txtbl{width:100%;border-collapse:collapse}
+.txtbl th{text-align:left;padding:13px 20px;font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid rgba(255,255,255,0.05)}
+.txtbl td{padding:13px 20px;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.03)}
+.txtbl tr:hover td{background:rgba(255,255,255,0.015)}
+.txhash{font-family:var(--fm);font-size:10px;color:var(--t3)}
+.txst{display:inline-flex;align-items:center;gap:5px;font-size:12px}
+.sdot{width:6px;height:6px;border-radius:50%}
+.sdot-g{background:var(--g)}
+.sdot-o{background:var(--o)}
+.sdot-r{background:var(--r)}
+.reflayout{display:grid;grid-template-columns:1fr 300px;gap:16px}
+.reflink{background:var(--bg2);border:1px solid rgba(255,255,255,0.08);border-radius:var(--rm);padding:14px;display:flex;gap:9px;align-items:center;margin-bottom:16px}
+.reflnktxt{flex:1;font-family:var(--fm);font-size:11px;color:var(--p);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reftiers{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.reftier{padding:13px;background:rgba(255,255,255,0.03);border-radius:var(--rm);display:flex;align-items:center;justify-content:space-between}
+.rtlbl{font-size:13px;font-weight:600}
+.rtpct{font-size:20px;font-weight:800;color:var(--p)}
+.rtdesc{font-size:11px;color:var(--t3)}
+.refsgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.refs{background:rgba(255,255,255,0.03);border-radius:var(--rm);padding:14px;text-align:center}
+.rsval{font-size:22px;font-weight:800;color:var(--g)}
+.rslbl{font-size:11px;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:0.05em}
+.reftbl{padding:12px 20px}
+.refrow{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.refrow:last-child{border-bottom:none}
+.rrusr{font-size:13px;font-weight:600}
+.rrmeta{font-size:11px;color:var(--t3)}
+.rrearns{font-family:var(--fm);font-size:13px;font-weight:700;color:var(--g)}
+.setgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px}
+.toglist{padding:12px 20px}
+.togitem{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.togitem:last-child{border-bottom:none}
+.toginfo span{font-size:13px;color:var(--t2);display:block;font-weight:600}
+.toginfo small{font-size:11px;color:var(--t3)}
+.tog{width:42px;height:23px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,0.1);border-radius:var(--rf);position:relative;cursor:pointer;transition:background 0.25s;flex-shrink:0}
+.tog::after{content:'';position:absolute;top:2px;left:2px;width:19px;height:19px;background:#fff;border-radius:50%;transition:transform 0.25s}
+.tog:checked{background:var(--p)}
+.tog:checked::after{transform:translateX(19px)}
+.dzcard{border-color:rgba(255,77,109,0.18)!important}
+.dzitem{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.dzitem:last-child{border-bottom:none}
+.dztitle{font-weight:700;color:var(--r);font-size:13px;margin-bottom:2px}
+.dzdesc{font-size:11px;color:var(--t3)}
+/* CHAT */
+#chatwid{position:fixed;bottom:24px;right:24px;z-index:700}
+.chatbtn{width:52px;height:52px;background:var(--gp);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#000;box-shadow:0 6px 24px rgba(79,158,255,0.4);transition:all 0.3s;cursor:pointer}
+.chatbtn:hover{transform:scale(1.08)}
+.chatnot{position:absolute;top:-2px;right:-2px;width:17px;height:17px;background:var(--r);border-radius:50%;border:2px solid var(--bg);display:none;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff}
+.chatpanel{position:absolute;bottom:66px;right:0;width:300px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl);box-shadow:0 20px 60px rgba(0,0,0,0.5);overflow:hidden;display:none;flex-direction:column}
+.chatpanel.open{display:flex}
+.chathead{padding:14px 16px;background:var(--gp);display:flex;align-items:center;justify-content:space-between}
+.chtitle{font-weight:800;font-size:14px;color:#000}
+.chsub{font-size:10px;color:rgba(0,0,0,0.6);margin-top:1px}
+.chatmsgs{flex:1;padding:14px;height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:82%;padding:9px 13px;border-radius:16px;font-size:13px;line-height:1.5}
+.msg-b{background:rgba(255,255,255,0.07);color:var(--t1);align-self:flex-start;border-bottom-left-radius:4px}
+.msg-u{background:var(--p);color:#000;align-self:flex-end;border-bottom-right-radius:4px;font-weight:600}
+.chatinpr{padding:10px;border-top:1px solid var(--bdr);display:flex;gap:7px}
+.chatinp{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:var(--rf);padding:8px 13px;color:var(--t1);font-size:13px;font-family:var(--fs)}
+.chatinp:focus{outline:none;border-color:var(--p)}
+.chatinp::placeholder{color:var(--t3)}
+.chatsend{width:34px;height:34px;background:var(--p);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#000;flex-shrink:0;transition:all 0.2s;cursor:pointer}
+.chatsend:hover{background:var(--pl)}
+/* TOAST */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg2);border:1px solid rgba(255,255,255,0.12);border-radius:var(--rm);padding:13px 20px;font-size:13px;font-weight:600;color:var(--t1);z-index:9000;opacity:0;transition:all 0.35s;box-shadow:0 12px 40px rgba(0,0,0,0.4);max-width:340px;text-align:center;pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+#toast.suc{border-left:3px solid var(--g)}
+#toast.err{border-left:3px solid var(--r)}
+#toast.inf{border-left:3px solid var(--p)}
+#toast.warn{border-left:3px solid var(--o)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:var(--rf)}
+@media(max-width:1100px){.calcgrid{grid-template-columns:1fr}.footgrid{grid-template-columns:1fr 1fr}.minelayout{grid-template-columns:1fr}.walletlayout{grid-template-columns:1fr}.reflayout{grid-template-columns:1fr}.setgrid{grid-template-columns:1fr}.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.sdtoggle{display:block}}
+@media(max-width:768px){.nlinks,.nright .btn{display:none}.mob-btn{display:block}.pbar{display:none}.navbar{margin-top:0}.netbar{margin-top:66px}.hero{padding-top:130px}.pcgrid{grid-template-columns:1fr}.pricegrid{grid-template-columns:1fr}.testgrid{grid-template-columns:1fr}.dh{flex-direction:column;gap:12px}.srow{grid-template-columns:1fr 1fr}.irow{grid-template-columns:1fr}.planpicker{grid-template-columns:1fr}.cardflds{grid-template-columns:1fr}.footgrid{grid-template-columns:1fr}.ftbot{flex-direction:column;gap:14px;text-align:center}.nbi{gap:16px;justify-content:flex-start;padding:0 20px;overflow-x:auto;flex-wrap:nowrap}}
+</style>
+</head>
+<body>
+
+<!-- COOKIE -->
+<div id="cookie">
+  <div class="ck-txt">We use cookies to enhance your experience. <a href="#">Cookie Policy</a></div>
+  <div class="ck-btns">
+    <button class="btn btn-ghost btn-sm" onclick="dismissCookie()">Decline</button>
+    <button class="btn btn-primary btn-sm" onclick="dismissCookie()">Accept All</button>
+  </div>
+</div>
+
+<!-- LANDING -->
+<div id="landing">
+
+<div class="pbar"><div class="pbar-inner" id="pbar-inner"></div></div>
+
+<nav class="navbar" id="navbar">
+  <div class="navc">
+    <div class="nbrand" onclick="scrollTop()">
+      <div class="nlogo"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+      <div class="ntxt">WILLIS HASHVAULT<span>Cloud Mining Platform</span></div>
+    </div>
+    <div class="nlinks">
+      <a href="#features" class="nlink">Features</a>
+      <a href="#howitworks" class="nlink">How It Works</a>
+      <a href="#calculator" class="nlink">Calculator</a>
+      <a href="#pricing" class="nlink">Pricing</a>
+      <a href="#reviews" class="nlink">Reviews</a>
+      <a href="#faq" class="nlink">FAQ</a>
+    </div>
+    <div class="nright">
+      <div style="position:relative">
+        <button class="iconbtn" onclick="toggleNotif()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="ndot" id="ndot"></span>
+        </button>
+        <div class="npanel" id="npanel">
+          <div class="nph"><span>Notifications</span><button onclick="markRead()" style="font-size:11px;color:var(--p);cursor:pointer;background:none;border:none;font-family:var(--fs)">Mark all read</button></div>
+          <div id="nlist"></div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="openM('login')">Sign In</button>
+      <button class="btn btn-primary btn-sm" onclick="openM('register')">Start Mining</button>
+    </div>
+    <button class="mob-btn" onclick="toggleMob()">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="mob-menu" id="mobmenu">
+    <a href="#features" class="mob-link" onclick="toggleMob()">Features</a>
+    <a href="#howitworks" class="mob-link" onclick="toggleMob()">How It Works</a>
+    <a href="#calculator" class="mob-link" onclick="toggleMob()">Calculator</a>
+    <a href="#pricing" class="mob-link" onclick="toggleMob()">Pricing</a>
+    <a href="#reviews" class="mob-link" onclick="toggleMob()">Reviews</a>
+    <a href="#faq" class="mob-link" onclick="toggleMob()">FAQ</a>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-ghost w-full" onclick="openM('login');toggleMob()">Sign In</button>
+      <button class="btn btn-primary w-full" onclick="openM('register');toggleMob()">Start Mining</button>
+    </div>
+  </div>
+</nav>
+
+<div class="netbar">
+  <div class="nbi">
+    <div class="nb-it"><span class="nb-lbl">BTC</span><span class="nb-val grn" id="nb-btc">$67,420</span></div>
+    <div class="nb-it"><span class="nb-lbl">Network</span><span class="nb-val blu">682.4 EH/s</span></div>
+    <div class="nb-it"><span class="nb-lbl">Block</span><span class="nb-val" id="nb-blk">841,209</span></div>
+    <div class="nb-it"><span class="nb-lbl">Difficulty</span><span class="nb-val">88.1 T</span></div>
+    <div class="nb-it"><span class="nb-lbl">Miners</span><span class="nb-val grn" id="nb-min">47,241</span></div>
+    <div class="nb-it"><span class="nb-lbl">24h Payouts</span><span class="nb-val grn">$2.14M</span></div>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="gorb gorb1"></div>
+  <div class="gorb gorb2"></div>
+  <div class="hero-content">
+    <div class="tbadge"><span class="pdot"></span><span id="actcount">47,241 miners earning right now</span></div>
+    <h1 class="hero-title">Mine Bitcoin with<br><span class="gt">Willis HashVault</span></h1>
+    <p class="hero-sub">The world's most trusted cloud mining platform. No hardware, no technical skills. Guaranteed daily BTC payouts from day one.</p>
+    <div class="calccard">
+      <div class="calcgrid">
+        <div>
+          <h3 style="font-size:14px;font-weight:700;margin-bottom:4px">Choose Your Plan</h3>
+          <p style="font-size:11px;color:var(--t3);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.05em">Select daily BTC output</p>
+          <div class="plan-btns">
+            <button class="plan-btn active" onclick="selPlan(this,0.005,42,99,'85 TH/s')">
+              <div class="pmain"><span class="pbtc">0.005 BTC / day</span><span class="proi">~42 days ROI</span></div>
+              <div class="pfiat">approx $337/day - Starter - $99/mo</div>
+            </button>
+            <button class="plan-btn" onclick="selPlan(this,0.015,28,249,'240 TH/s')">
+              <div class="pmain"><span class="pbtc">0.015 BTC / day</span><span class="proi">~28 days ROI</span></div>
+              <div class="pfiat">approx $1,011/day - Pro - $249/mo</div>
+            </button>
+            <button class="plan-btn" onclick="selPlan(this,0.035,21,499,'580 TH/s')">
+              <div class="pmain"><span class="pbtc">0.035 BTC / day</span><span class="proi">~21 days ROI</span></div>
+              <div class="pfiat">approx $2,359/day - Enterprise - $499/mo</div>
+            </button>
+            <button class="plan-btn" onclick="selPlan(this,0.075,14,999,'1.2 PH/s')">
+              <div class="pmain"><span class="pbtc">0.075 BTC / day</span><span class="proi">~14 days ROI</span></div>
+              <div class="pfiat">approx $5,056/day - Elite - $999/mo</div>
+            </button>
+          </div>
+        </div>
+        <div>
+          <div class="mbox">
+            <div class="bigtimer" id="htimer">00:00:00</div>
+            <div class="stxt" id="hstatus">Select a plan and start demo mining</div>
+            <div class="ministats">
+              <div class="ms"><div class="ms-val" id="hearned">0.00000</div><div class="ms-lbl">BTC Earned</div></div>
+              <div class="ms"><div class="ms-val" id="hrate" style="font-size:15px">85 TH/s</div><div class="ms-lbl">Hashrate</div></div>
+            </div>
+            <div class="hashstream" id="hhash">Waiting to start mining...</div>
+          </div>
+          <button class="btn btn-primary btn-lg w-full" id="hminebtn" onclick="heroMine()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Start Free Demo Mining
+          </button>
+          <p style="text-align:center;font-size:10px;color:var(--t3);margin-top:8px">Demo only - Sign up to keep your BTC</p>
+        </div>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hs-item"><div class="hs-val gt">$2.1B+</div><div class="hs-lbl">Total Paid Out</div></div>
+      <div class="hs-div"></div>
+      <div class="hs-item"><div class="hs-val gt">47K+</div><div class="hs-lbl">Active Miners</div></div>
+      <div class="hs-div"></div>
+      <div class="hs-item"><div class="hs-val gt">99.97%</div><div class="hs-lbl">Uptime SLA</div></div>
+      <div class="hs-div"></div>
+      <div class="hs-item"><div class="hs-val gt">120+</div><div class="hs-lbl">Countries</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="features">
+  <div class="container">
+    <div class="sh"><p class="stag">Why Willis HashVault</p><h2 class="stitle">Everything You Need to <span class="gt">Mine Smarter</span></h2><p class="ssub">Professional cloud mining with bank-grade security, real-time analytics, and guaranteed daily BTC payouts.</p></div>
+    <div class="featgrid">
+      <div class="feat"><div class="fic" style="background:rgba(79,158,255,0.15)"><svg width="20" height="20" fill="none" stroke="var(--p)" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><h3 class="ft">Zero Hardware Costs</h3><p class="fd">Skip the $10,000+ ASIC setup. Mine via our enterprise data centers with zero hardware or electricity costs.</p></div>
+      <div class="feat"><div class="fic" style="background:rgba(0,212,161,0.15)"><svg width="20" height="20" fill="none" stroke="var(--g)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><h3 class="ft">Mining in 5 Minutes</h3><p class="fd">Instant activation. Sign up, pick a plan, and your first BTC hits your wallet within 24 hours.</p></div>
+      <div class="feat"><div class="fic" style="background:rgba(255,179,71,0.15)"><svg width="20" height="20" fill="none" stroke="var(--o)" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><h3 class="ft">Live Dashboard</h3><p class="fd">Real-time hashrate, earnings charts, and transaction history updating every second live.</p></div>
+      <div class="feat"><div class="fic" style="background:rgba(79,158,255,0.15)"><svg width="20" height="20" fill="none" stroke="var(--p)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><h3 class="ft">Bank-Grade Security</h3><p class="fd">256-bit SSL, multi-sig cold wallets, 2FA, and quarterly third-party security audits.</p></div>
+      <div class="feat"><div class="fic" style="background:rgba(0,212,161,0.15)"><svg width="20" height="20" fill="none" stroke="var(--g)" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><h3 class="ft">Daily Auto-Payouts</h3><p class="fd">Earnings credited every 24 hours automatically. Withdraw to any BTC wallet with no minimum hold.</p></div>
+      <div class="feat"><div class="fic" style="background:rgba(255,77,109,0.15)"><svg width="20" height="20" fill="none" stroke="var(--r)" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3 class="ft">3-Tier Referral</h3><p class="fd">Earn up to 10% lifetime commissions on referrals across 3 tiers. Turn your network into income.</p></div>
+      <div class="feat"><div class="fic" style="background:rgba(79,158,255,0.15)"><svg width="20" height="20" fill="none" stroke="var(--p)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h3 class="ft">99.97% Uptime</h3><p class="fd">Redundant infrastructure across 8 global data centers. Your mining never stops.</p></div>
+      <div class="feat"><div class="fic" style="background:rgba(0,212,161,0.15)"><svg width="20" height="20" fill="none" stroke="var(--g)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><h3 class="ft">Multi-Currency</h3><p class="fd">Mine Bitcoin, Ethereum, and Litecoin simultaneously with unified wallet management.</p></div>
+      <div class="feat"><div class="fic" style="background:rgba(255,179,71,0.15)"><svg width="20" height="20" fill="none" stroke="var(--o)" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><h3 class="ft">Flexible Plans</h3><p class="fd">Month-to-month. Upgrade, downgrade, or cancel anytime with no penalties or lock-ups.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section altbg" id="howitworks">
+  <div class="container">
+    <div class="sh"><p class="stag">Simple Process</p><h2 class="stitle">Up and Mining in <span class="gt">4 Easy Steps</span></h2><p class="ssub">No technical expertise required. Start earning Bitcoin passively in under 5 minutes.</p></div>
+    <div class="stepgrid">
+      <div class="step"><div class="snum">1</div><h3 style="font-weight:700;margin-bottom:7px">Create Account</h3><p style="font-size:13px;color:var(--t2);line-height:1.65">Sign up with email in 60 seconds. No ID verification or KYC needed.</p></div>
+      <div class="step"><div class="snum">2</div><h3 style="font-weight:700;margin-bottom:7px">Choose a Plan</h3><p style="font-size:13px;color:var(--t2);line-height:1.65">Pick the plan that matches your goals. Guaranteed daily BTC from just $99/month.</p></div>
+      <div class="step"><div class="snum">3</div><h3 style="font-weight:700;margin-bottom:7px">Start Mining</h3><p style="font-size:13px;color:var(--t2);line-height:1.65">Servers instantly start mining BTC for you. Monitor everything live from your dashboard.</p></div>
+      <div class="step"><div class="snum">4</div><h3 style="font-weight:700;margin-bottom:7px">Withdraw Profits</h3><p style="font-size:13px;color:var(--t2);line-height:1.65">Cash out your Bitcoin anytime to any wallet. No lock-up periods or withdrawal fees.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="tsec"><div class="tlbl">Live Payouts - Last 24 Hours</div><div class="twrap"><div class="ticker" id="lticker"></div></div></div>
+
+<section class="section" id="calculator">
+  <div class="container">
+    <div class="sh"><p class="stag">Profit Calculator</p><h2 class="stitle">Calculate Your <span class="gt">Mining Earnings</span></h2><p class="ssub">See exactly how much you could earn. Adjust hashrate and duration to find your perfect plan.</p></div>
+    <div class="pc-card">
+      <div class="pcgrid">
+        <div>
+          <div class="fg"><label class="fl">Hashrate: <span class="sval" id="pchval">240 TH/s</span></label><div style="margin:8px 0 4px"><input type="range" class="pcslider" id="pchr" min="85" max="1200" value="240" step="5" oninput="updateCalc()"></div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-top:5px"><span>85 TH/s</span><span>1.2 PH/s</span></div></div>
+          <div class="fg"><label class="fl">Mining Duration</label><div class="sw"><select class="fsel" id="pcdur" onchange="updateCalc()"><option value="1">1 Day</option><option value="7">1 Week</option><option value="30" selected>1 Month</option><option value="90">3 Months</option><option value="365">1 Year</option></select><svg class="sa" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+          <div class="fg"><label class="fl">BTC Price</label><div class="sw"><select class="fsel" id="pcpx" onchange="updateCalc()"><option value="50000">$50,000 (Conservative)</option><option value="67420" selected>$67,420 (Current)</option><option value="100000">$100,000 (Optimistic)</option><option value="150000">$150,000 (Bull Case)</option></select><svg class="sa" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+          <button class="btn btn-primary w-full" onclick="openM('register')">Start Mining with This Plan</button>
+        </div>
+        <div>
+          <h3 style="font-size:13px;font-weight:700;margin-bottom:14px;color:var(--t2);text-transform:uppercase;letter-spacing:0.05em">Estimated Results</h3>
+          <div class="pcresults">
+            <div class="pcrow"><span style="color:var(--t2)">Daily BTC Output</span><span class="pcval" id="pc-dbtc">0.01500 BTC</span></div>
+            <div class="pcrow"><span style="color:var(--t2)">Daily USD Value</span><span class="pcval grn" id="pc-dusd">$1,011.30</span></div>
+            <div class="pcrow"><span style="color:var(--t2)">Total BTC Mined</span><span class="pcval" id="pc-tbtc">0.45000 BTC</span></div>
+            <div class="pcrow"><span style="color:var(--t2)">Power Fees</span><span class="pcval" style="color:var(--r)" id="pc-fees">-$1,481.84</span></div>
+            <div class="pcrow"><span style="color:var(--t2)">Net Profit</span><span class="pcval grn" id="pc-net">$28,849.27</span></div>
+            <div class="pcrow big"><span>ROI</span><span class="pcval big" id="pc-roi">1,157%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section altbg" id="reviews">
+  <div class="container">
+    <div class="sh"><p class="stag">Real Reviews</p><h2 class="stitle">Trusted by <span class="gt">47,000+ Miners</span></h2><p class="ssub">Here's what real Willis HashVault miners say about their experience.</p></div>
+    <div class="testgrid">
+      <div class="testcard"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="testtxt">"I've been using Willis HashVault for 8 months. Payouts are incredibly consistent - I earn around $1,400/month passively. Dashboard is clean, support is top-notch."</p><div class="testau"><div class="taav" style="background:var(--gp)">MK</div><div><div class="tanm">Michael K.<span class="taver">Verified</span></div><div class="tameta">Pro Plan - Lagos, Nigeria - 8 months</div></div></div></div>
+      <div class="testcard"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="testtxt">"Started with Starter to test it. Upgraded to Enterprise within a week. ROI is real and withdrawals hit my Coinbase wallet in under an hour. Game changer."</p><div class="testau"><div class="taav" style="background:linear-gradient(135deg,#00d4a1,#4f9eff)">SR</div><div><div class="tanm">Sarah R.<span class="taver">Verified</span></div><div class="tameta">Enterprise - London, UK - 1 year</div></div></div></div>
+      <div class="testcard"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="testtxt">"The referral program alone paid for my subscription 3x over. I've referred 12 people and earn commissions on all of them for life. Genuinely different."</p><div class="testau"><div class="taav" style="background:linear-gradient(135deg,#ffb347,#ff4d6d)">JT</div><div><div class="tanm">James T.<span class="taver">Verified</span></div><div class="tameta">Elite Plan - Toronto, Canada - 14 months</div></div></div></div>
+      <div class="testcard"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="testtxt">"Zero crypto knowledge when I started. The onboarding was seamless and live chat walked me through everything. First payout arrived in just 22 hours!"</p><div class="testau"><div class="taav" style="background:linear-gradient(135deg,#00d4a1,#7bb8ff)">AL</div><div><div class="tanm">Amara L.<span class="taver">Verified</span></div><div class="tameta">Starter - Accra, Ghana - 4 months</div></div></div></div>
+      <div class="testcard"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="testtxt">"Tried 4 cloud mining platforms. Willis HashVault is the only one that delivers on its promises. The transparency, live stats, and instant withdrawals are top tier."</p><div class="testau"><div class="taav" style="background:linear-gradient(135deg,#4f9eff,#7b5ea7)">DM</div><div><div class="tanm">David M.<span class="taver">Verified</span></div><div class="tameta">Pro Plan - Berlin, Germany - 11 months</div></div></div></div>
+      <div class="testcard"><div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="testtxt">"Elite plan for over a year. ROI broke even in 3 weeks - everything after that is pure profit. The 2FA and cold wallet security gives complete peace of mind."</p><div class="testau"><div class="taav" style="background:linear-gradient(135deg,#ff4d6d,#ffb347)">KC</div><div><div class="tanm">Kevin C.<span class="taver">Verified</span></div><div class="tameta">Elite Plan - Dubai, UAE - 16 months</div></div></div></div>
+    </div>
+    <div style="text-align:center;margin-top:28px"><div style="display:inline-flex;align-items:center;gap:10px;background:rgba(0,212,161,0.08);border:1px solid rgba(0,212,161,0.18);padding:12px 24px;border-radius:var(--rf)"><span style="font-size:20px;font-weight:800;color:var(--g)">4.9/5</span><span style="font-size:16px;color:var(--gold)">&#9733;&#9733;&#9733;&#9733;&#9733;</span><span style="font-size:13px;color:var(--t2)">from 12,400+ verified reviews on Trustpilot</span></div></div>
+  </div>
+</section>
+
+<section class="section" id="pricing">
+  <div class="container">
+    <div class="sh"><p class="stag">Transparent Pricing</p><h2 class="stitle">Choose Your <span class="gt">Mining Power</span></h2><p class="ssub">All plans include full dashboard, daily payouts, referral access, and 24/7 support. Cancel anytime.</p></div>
+    <div class="pricegrid">
+      <div class="pricecard">
+        <div class="pcname">Starter</div>
+        <div class="pcprice"><span class="pn">$99</span><span class="pp">/mo</span></div>
+        <div class="pcdesc">Perfect for getting started</div>
+        <ul class="pcfeats">
+          <li><svg width="13" height="13" fill="none" stroke="var(--g)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>0.005 BTC / day guaranteed</li>
+          <li><svg width="13" height="13" fill="none" stroke="var(--g)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>85 TH/s dedicated hashrate</li>
+          <li><svg width="13" height="13" fill="none" stroke="var(--g)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Daily BTC auto-payouts</li>
+          <li><svg width="13" height="13" fill="none" stroke="var(--g)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Real-time dashboard</li>
+          <li><svg width="13" height="13" fill="none" stroke="var(--g)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Referral program (5%)</li>
+        </ul>
+        <button class="btn btn-outline w-full" onclick="openM('register')">Get Started</button>
+      </div>
+      <div class="pricecard pop">
+        <div class="popbadge">MOST POPULAR</div>
+        <div class="pcname">Pro</div>
+        <div class="pcprice"><span class="pn">$249</span><span class="pp">/mo</span></div>
+        <div class="pcdesc">For serious miners wanting max returns</div>
+        <ul class="pcfeats">
+          <li><svg width="13" height="13" fill="none" stroke="var(--g)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>0.015 BTC / day guaranteed</li>
+          <li><svg width="13" height="13" fill="none" stroke="var(--g)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>240 TH/s dedicated hashrate</li>
+          <li><svg width="13" height="13" fill="none" stroke="var(--g)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Priority daily payouts</li>
+          <li><svg width="13" height="13" fill="none" stroke="var(--g)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Advanced analytics</li>
+          <li><svg width="13" height="13" fill="none" stroke="var(--g)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Referral program (8%)</li>
+          <li><svg width="13" height="13" fill="none" stroke="var(--g)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Priority 24/7 live support</li>
+        </ul>
+        <button class="btn btn-primary w-full" onclick="openM('register')">Start Pro Mining</button>
+      </div>
+      <div class="pricecard">
+        <div class="pcname">Enterprise</div>
+        <div class="pcprice"><span class="pn">$499</span><span class="pp">/mo</span></div>
+        <div class="pcdesc">Maximum power, institutional grade</div>
+        <ul class="pcfeats">
+          <li><svg width="13" height="13" fill="none" stroke="var(--g)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>0.035 BTC / day guaranteed</li>
+          <li><svg width="13" height="13" fill="none" stroke="var(--g)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>580 TH/s dedicated hashrate</li>
+          <li><svg width="13" height="13" fill="none" stroke="var(--g)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Instant on-demand payouts</li>
+          <li><svg width="13" height="13" fill="none" stroke="var(--g)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Dedicated account manager</li>
+          <li><svg width="13" height="13" fill="none" stroke="var(--g)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Referral program (10%)</li>
+        </ul>
+        <button class="btn btn-outline w-full" onclick="openM('upgrade')">Get Enterprise</button>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:20px;font-size:12px;color:var(--t3)">SSL Secured - All cards accepted - Cancel anytime - Use code <strong style="color:var(--p)">WILLIS50</strong> for 50% off</div>
+  </div>
+</section>
+
+<section class="section altbg" id="faq">
+  <div class="container">
+    <div class="sh"><p class="stag">FAQ</p><h2 class="stitle">Frequently Asked <span class="gt">Questions</span></h2><p class="ssub">Everything you need to know about Willis HashVault cloud mining.</p></div>
+    <div class="faqlist">
+      <div class="faqitem"><button class="faqq" onclick="toggleFaq(this)">What is cloud mining and how does Willis HashVault work?<svg class="faqarr" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="faqa">Cloud mining lets you mine Bitcoin without owning hardware. You rent hashrate from our enterprise data centers and we deposit your share of block rewards into your wallet every 24 hours. Zero hardware, electricity, or cooling needed.</div></div>
+      <div class="faqitem"><button class="faqq" onclick="toggleFaq(this)">How quickly do I start earning after signing up?<svg class="faqarr" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="faqa">Mining activates within 5 minutes of plan selection. Your first BTC payout arrives within 24 hours. Monitor live earnings from your dashboard from the moment you start.</div></div>
+      <div class="faqitem"><button class="faqq" onclick="toggleFaq(this)">How does the 3-tier referral program work?<svg class="faqarr" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="faqa">You earn a percentage of every payout made to miners you refer, for life. Starter earns 5%, Pro earns 8%, Enterprise earns 10% on Tier 1. Plus 3% on Tier 2 and 1% on Tier 3. Paid daily.</div></div>
+      <div class="faqitem"><button class="faqq" onclick="toggleFaq(this)">How do I withdraw Bitcoin from Willis HashVault?<svg class="faqarr" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="faqa">Go to Wallet then Withdraw in your dashboard. Enter any BTC address and amount. Withdrawals process within 30 minutes and confirm on-chain within 1 hour. No minimum amount beyond the standard BTC network fee.</div></div>
+      <div class="faqitem"><button class="faqq" onclick="toggleFaq(this)">Is my Bitcoin safe with Willis HashVault?<svg class="faqarr" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="faqa">100% cold storage reserves, audited quarterly. Multi-signature wallets, 2FA on all withdrawals, and 256-bit SSL encryption. We have never been hacked in 5+ years of operation.</div></div>
+      <div class="faqitem"><button class="faqq" onclick="toggleFaq(this)">Can I cancel my plan at any time?<svg class="faqarr" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="faqa">Yes, all plans are month-to-month. Cancel anytime from Settings with zero penalties. Accumulated BTC stays in your wallet and can be withdrawn at any time after cancellation.</div></div>
+      <div class="faqitem"><button class="faqq" onclick="toggleFaq(this)">What happens if Bitcoin network difficulty increases?<svg class="faqarr" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="faqa">We guarantee your contracted daily BTC output regardless of difficulty changes. When difficulty rises, we scale our hashrate automatically to maintain your payout. You always receive exactly what your plan promises.</div></div>
+      <div class="faqitem"><button class="faqq" onclick="toggleFaq(this)">Do you offer a mobile app?<svg class="faqarr" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="faqa">Our web dashboard is fully mobile-responsive and works perfectly on any smartphone browser. Native iOS and Android apps are in beta and launching Q3 2026.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="ctasec">
+  <div class="ctaorb"></div>
+  <div class="ctacnt">
+    <h2 class="ctatitle">Start Earning Bitcoin with <span class="gt">Willis HashVault</span></h2>
+    <p class="ctasub">Join 47,000+ miners worldwide. No hardware. No hassle. Your first BTC payout arrives within 24 hours.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary btn-lg" onclick="openM('register')">Start Mining Free</button>
+      <a href="#calculator" class="btn btn-ghost btn-lg">Calculate Earnings</a>
+    </div>
+    <p style="margin-top:16px;font-size:12px;color:var(--t3)">Use code <strong style="color:var(--p)">WILLIS50</strong> for 50% off - No credit card required - Cancel anytime</p>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footgrid">
+      <div class="ftbrand">
+        <div class="nbrand"><div class="nlogo"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><div class="ntxt">WILLIS HASHVAULT<span>Cloud Mining Platform</span></div></div>
+        <p>The world's most trusted cloud Bitcoin mining platform. Serving 47,000+ miners across 120+ countries since 2019.</p>
+      </div>
+      <div class="ftcol"><h4>Platform</h4><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#calculator">Calculator</a><a href="#howitworks">How It Works</a></div>
+      <div class="ftcol"><h4>Company</h4><a href="#">About Us</a><a href="#">Blog</a><a href="#">Careers</a><a href="#">Press Kit</a></div>
+      <div class="ftcol"><h4>Support</h4><a href="#">Help Center</a><a href="#">Contact Us</a><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div>
+    </div>
+    <div class="ftbot">
+      <span>&#169; 2026 Willis HashVault. All rights reserved.</span>
+      <div class="socials">
+        <a href="#"><svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg></a>
+        <a href="#"><svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M21.198 2.433a2.242 2.242 0 0 0-1.022.215l-16.5 7a2.249 2.249 0 0 0 .128 4.152l3.696 1.231 1.327 4.56a.75.75 0 0 0 1.268.256l2.07-2.168 3.824 2.868a2.25 2.25 0 0 0 3.545-1.355l2.773-14.5a2.249 2.249 0 0 0-2.109-2.259z"/></svg></a>
+      </div>
+    </div>
+  </div>
+</footer>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden" style="min-height:100vh">
+  <button class="sdtoggle" id="sdtog" onclick="toggleSidebar()"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <aside class="sidebar" id="sidebar">
+    <div class="sdbrand"><div class="nbrand"><div class="nlogo"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><div class="ntxt">WILLIS HASHVAULT<span>Cloud Mining Platform</span></div></div></div>
+    <nav class="sdnav">
+      <div class="sdsec">Main</div>
+      <a class="sl active" onclick="showSec('overview',this)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Overview</a>
+      <a class="sl" onclick="showSec('mining',this)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Mining Console</a>
+      <a class="sl" onclick="showSec('wallet',this)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Wallet</a>
+      <a class="sl" onclick="showSec('transactions',this)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transactions</a>
+      <div class="sdsec">Grow</div>
+      <a class="sl" onclick="showSec('referral',this)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Referral Program<span class="badge">New</span></a>
+      <a class="sl" onclick="openM('upgrade')"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>Upgrade Plan</a>
+      <div class="sdsec">Account</div>
+      <a class="sl" onclick="showSec('settings',this)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+    </nav>
+    <div class="sdfooter">
+      <div class="ucard"><div class="uav" id="dash-av">WH</div><div><div class="unm" id="dash-nm">Willis Miner</div><div class="upl"><span class="planchip">Pro Plan</span></div></div></div>
+      <button class="btn btn-ghost btn-sm w-full" onclick="logout()">Sign Out</button>
+    </div>
+  </aside>
+  <main class="main" id="maincontent" style="display:block">
+
+    <!-- OVERVIEW -->
+    <div id="sec-overview" class="dsec active">
+      <div class="dh"><div class="dh-l"><h1>Overview</h1><p>Welcome back, <span id="dash-greet">Miner</span></p></div><div class="dh-r"><button class="btn btn-ghost btn-sm" onclick="showSec('transactions',document.querySelectorAll('.sl')[3])">View History</button><button class="btn btn-primary btn-sm" onclick="openM('withdraw')">Withdraw BTC</button></div></div>
+      <div class="srow">
+        <div class="sbox"><div class="sboxic" style="background:rgba(79,158,255,0.15)"><svg width="18" height="18" fill="none" stroke="var(--p)" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div><div class="sboxlbl">Total Earned</div><div class="sboxval">$12,840</div><div class="sboxch pos">+12.4% this month</div></div></div>
+        <div class="sbox"><div class="sboxic" style="background:rgba(0,212,161,0.15)"><svg width="18" height="18" fill="none" stroke="var(--g)" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><div><div class="sboxlbl">Active Hashrate</div><div class="sboxval">240 TH/s</div><div class="sboxch pos">Running smoothly</div></div></div>
+        <div class="sbox"><div class="sboxic" style="background:rgba(255,179,71,0.15)"><svg width="18" height="18" fill="none" stroke="var(--o)" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div><div class="sboxlbl">BTC Today</div><div class="sboxval" id="st-today">0.01500</div><div class="sboxch pos">On track</div></div></div>
+        <div class="sbox"><div class="sboxic" style="background:rgba(79,158,255,0.15)"><svg width="18" height="18" fill="none" stroke="var(--p)" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><div><div class="sboxlbl">Wallet Balance</div><div class="sboxval">$2,840</div><div class="sboxch" style="font-family:var(--fm)">0.04213 BTC</div></div></div>
+        <div class="sbox"><div class="sboxic" style="background:rgba(255,77,109,0.15)"><svg width="18" height="18" fill="none" stroke="var(--r)" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div><div class="sboxlbl">Referral Earnings</div><div class="sboxval">$420</div><div class="sboxch pos">3 active referrals</div></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px">
+        <div class="dc"><div class="dch"><span class="dcht">Earnings Overview</span><div class="tabrow"><button class="tb active" onclick="switchChart('7d',this)">7D</button><button class="tb" onclick="switchChart('30d',this)">30D</button><button class="tb" onclick="switchChart('90d',this)">90D</button><button class="tb" onclick="switchChart('1y',this)">1Y</button></div></div><div class="cw"><canvas id="earningsChart"></canvas></div></div>
+        <div class="dc"><div class="dch"><span class="dcht">Assets</span></div><div class="cw"><canvas id="assetChart"></canvas></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="dc"><div class="dch"><span class="dcht">Recent Activity</span><button class="btn btn-ghost btn-sm" onclick="showSec('transactions',document.querySelectorAll('.sl')[3])">All</button></div><div class="actlist" id="actlist"></div></div>
+        <div class="dc"><div class="dch"><span class="dcht">Performance</span></div><div class="cwsm"><canvas id="perfChart"></canvas></div><div style="padding:12px 20px;border-top:1px solid rgba(255,255,255,0.04)"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:6px"><span>Efficiency</span><span style="color:var(--g);font-weight:700">78.4%</span></div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:6px"><span>Next Payout</span><span style="color:var(--t1);font-weight:700" id="next-pay">6h 24m</span></div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2)"><span>Uptime</span><span style="color:var(--g);font-weight:700">99.98%</span></div></div></div>
+      </div>
+    </div>
+
+    <!-- MINING -->
+    <div id="sec-mining" class="dsec">
+      <div class="dh"><div class="dh-l"><h1>Mining Console</h1><p>Configure and monitor your mining sessions</p></div><div class="dh-r"><span id="mbadge" style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--t3)"><span id="mbdot" style="width:7px;height:7px;border-radius:50%;background:var(--t3);flex-shrink:0"></span><span id="mbtext">Idle</span></span></div></div>
+      <div class="minelayout">
+        <div>
+          <div class="dc"><div class="dch"><span class="dcht">New Session</span></div>
+            <div class="mineform">
+              <div class="irow">
+                <div class="fg"><label class="fl">Cryptocurrency</label><div class="sw"><select class="fsel" id="mcoin" onchange="updateMine()"><option value="BTC">Bitcoin (BTC)</option><option value="ETH">Ethereum (ETH)</option><option value="LTC">Litecoin (LTC)</option></select><svg class="sa" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+                <div class="fg"><label class="fl">Duration</label><div class="sw"><select class="fsel" id="mdur" onchange="updateMine()"><option value="1">1 Hour</option><option value="6">6 Hours</option><option value="12">12 Hours</option><option value="24" selected>24 Hours</option><option value="168">7 Days</option></select><svg class="sa" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div></div>
+              </div>
+              <div class="fg"><label class="fl">Hashrate: <span class="sval" id="slideval">240 TH/s</span></label><input type="range" class="mslider" id="mslide" min="10" max="580" value="240" step="10" oninput="onSlide(this)"><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-top:5px"><span>10 TH/s</span><span>580 TH/s</span></div></div>
+              <div class="sumbox">
+                <div class="sumrow"><span>Daily Rate</span><span class="sumval" id="sm-rate">0.01500 BTC</span></div>
+                <div class="sumrow"><span>Duration</span><span class="sumval" id="sm-dur">24 Hours</span></div>
+                <div class="sumrow"><span>Power Fee (5.5%)</span><span class="sumval" id="sm-fee" style="color:var(--r)">-0.00082 BTC</span></div>
+                <div class="sumrow"><span>Net Earnings</span><span class="sumval" id="sm-net">0.01418 BTC</span></div>
+                <div class="sumrow tot"><span>Est. USD Value</span><span id="sm-usd">approx $955.51</span></div>
+              </div>
+              <button class="btn btn-primary btn-lg w-full" id="dminebtn" onclick="dashMine()">Start Mining Session</button>
+            </div>
+          </div>
+          <div class="dc"><div class="dch"><span class="dcht">Hashrate (24h)</span></div><div class="cwsm"><canvas id="hrChart"></canvas></div></div>
+        </div>
+        <div>
+          <div class="dc" style="margin-bottom:16px"><div class="dch"><span class="dcht">Live Session</span></div>
+            <div class="livepanel">
+              <div class="lptime"><div class="bigtimer" id="dtimer">00:00:00</div><p id="dses-status">No active session</p></div>
+              <div class="prog-r"><div class="prog-l">Hashrate Efficiency</div><div class="prog-b"><div class="prog-f" id="effbar" style="width:78%"></div></div><div class="prog-v" id="effval">78% effective</div></div>
+              <div style="display:flex;flex-direction:column;gap:7px;margin-top:12px">
+                <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--t3)">Session Earned</span><span style="color:var(--g);font-weight:700;font-family:var(--fm)" id="ses-earn">0.00000000 BTC</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--t3)">Pool</span><span style="color:var(--t1);font-weight:600">Willis Pool #3</span></div>
+              </div>
+              <div class="animhash" id="dashash">Waiting for session...</div>
+            </div>
+          </div>
+          <div class="dc"><div class="dch"><span class="dcht">Past Sessions</span></div><div style="padding:12px 20px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.03)"><div><div style="font-size:12px;font-weight:700">BTC - 24h</div><div style="font-size:10px;color:var(--t3)">2 days ago</div></div><span style="color:var(--g);font-family:var(--fm);font-size:12px;font-weight:700">+0.01418 BTC</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.03)"><div><div style="font-size:12px;font-weight:700">ETH - 12h</div><div style="font-size:10px;color:var(--t3)">3 days ago</div></div><span style="color:var(--g);font-family:var(--fm);font-size:12px;font-weight:700">+0.42100 ETH</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0"><div><div style="font-size:12px;font-weight:700">BTC - 7 Days</div><div style="font-size:10px;color:var(--t3)">10 days ago</div></div><span style="color:var(--g);font-family:var(--fm);font-size:12px;font-weight:700">+0.09926 BTC</span></div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WALLET -->
+    <div id="sec-wallet" class="dsec">
+      <div class="dh"><div class="dh-l"><h1>Wallet</h1><p>Manage your assets, deposits and withdrawals</p></div><div class="dh-r"><button class="btn btn-ghost btn-sm" onclick="openM('deposit')">Deposit</button><button class="btn btn-primary btn-sm" onclick="openM('withdraw')">Withdraw</button></div></div>
+      <div class="walletlayout">
+        <div>
+          <div class="dc"><div class="balcard">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+              <div><div class="ballbl">Total Portfolio</div><div class="balamt gt">$7,360.00</div><div class="balbtc">0.10921 BTC equivalent</div></div>
+              <div style="text-align:right"><div style="font-size:10px;color:var(--t3);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.05em">24h Change</div><div style="font-size:15px;font-weight:700;color:var(--g)">+$284.30</div><div style="font-size:11px;color:var(--g)">+4.01%</div></div>
+            </div>
+            <div style="display:flex;gap:9px">
+              <button class="btn btn-primary" style="flex:1" onclick="openM('withdraw')">Withdraw</button>
+              <button class="btn btn-ghost" style="flex:1" onclick="openM('deposit')">Deposit</button>
+              <button class="btn btn-ghost" style="flex:1" onclick="showToast('Address copied!','suc')">Copy</button>
+            </div>
+          </div></div>
+          <div class="dc"><div class="dch"><span class="dcht">Your Assets</span></div>
+            <div class="aitem"><div class="aiinfo"><div class="aiic" style="background:rgba(255,179,71,0.15);color:#f59e0b">B</div><div><div class="ainm">Bitcoin</div><div class="aisym">BTC</div></div></div><div class="aibal"><div class="aiamt">0.04213 BTC</div><div class="aiusd">$2,840.00</div></div></div>
+            <div class="aitem"><div class="aiinfo"><div class="aiic" style="background:rgba(99,102,241,0.15);color:#6366f1">E</div><div><div class="ainm">Ethereum</div><div class="aisym">ETH</div></div></div><div class="aibal"><div class="aiamt">0.84200 ETH</div><div class="aiusd">$2,945.00</div></div></div>
+            <div class="aitem"><div class="aiinfo"><div class="aiic" style="background:rgba(0,212,161,0.15);color:var(--g)">L</div><div><div class="ainm">Litecoin</div><div class="aisym">LTC</div></div></div><div class="aibal"><div class="aiamt">12.50 LTC</div><div class="aiusd">$1,125.00</div></div></div>
+            <div class="aitem"><div class="aiinfo"><div class="aiic" style="background:rgba(79,158,255,0.15);color:var(--p)">T</div><div><div class="ainm">Tether</div><div class="aisym">USDT</div></div></div><div class="aibal"><div class="aiamt">450.00 USDT</div><div class="aiusd">$450.00</div></div></div>
+          </div>
+          <div class="dc"><div class="dch"><span class="dcht">Balance History</span></div><div class="cwsm"><canvas id="walChart"></canvas></div></div>
+        </div>
+        <div>
+          <div class="dc" style="margin-bottom:16px"><div class="dch"><span class="dcht">Connected Wallets</span></div>
+            <div class="witem"><div><div style="font-size:12px;font-weight:700;margin-bottom:2px">Main BTC Wallet</div><div class="waddr">1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf</div></div><span class="chip chg">Active</span></div>
+            <div class="witem"><div><div style="font-size:12px;font-weight:700;margin-bottom:2px">ETH Wallet</div><div class="waddr">0x742d35Cc6634C0532925a3b8D4C9f44c</div></div><span class="chip chg">Active</span></div>
+            <div class="witem"><div><div style="font-size:12px;font-weight:700;margin-bottom:2px">Backup Wallet</div><div class="waddr">3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc</div></div><span class="chip chm">Backup</span></div>
+            <div style="padding:12px 20px;border-top:1px solid rgba(255,255,255,0.04)"><button class="btn btn-ghost btn-sm w-full" onclick="showToast('Add Wallet coming soon!','inf')">+ Add Wallet Address</button></div>
+          </div>
+          <div class="dc"><div class="dch"><span class="dcht">Quick Stats</span></div><div style="padding:14px 20px">
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px"><span style="color:var(--t2)">Total Withdrawals</span><span style="font-weight:700">$9,882.00</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px"><span style="color:var(--t2)">Pending Payouts</span><span style="font-weight:700;color:var(--o)">$126.40</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px"><span style="color:var(--t2)">This Month</span><span style="font-weight:700;color:var(--g)">+$1,420.50</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:12px"><span style="color:var(--t2)">Next Payout</span><span style="font-weight:700;color:var(--g)" id="w-next">6h 24m</span></div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANSACTIONS -->
+    <div id="sec-transactions" class="dsec">
+      <div class="dh"><div class="dh-l"><h1>Transactions</h1><p>Complete history of all mining rewards and withdrawals</p></div><div class="dh-r"><button class="btn btn-ghost btn-sm" onclick="showToast('Exporting CSV...','inf')">Export CSV</button></div></div>
+      <div class="dc"><div class="dch"><span class="dcht">All Transactions</span><div class="tabrow"><button class="tb active" onclick="filterTx('all',this)">All</button><button class="tb" onclick="filterTx('mining',this)">Mining</button><button class="tb" onclick="filterTx('withdrawal',this)">Withdrawals</button><button class="tb" onclick="filterTx('fee',this)">Fees</button></div></div><div class="txwrap"><table class="txtbl"><thead><tr><th>Type</th><th>Hash</th><th>Amount</th><th>USD</th><th>Date</th><th>Status</th></tr></thead><tbody id="tx-tbody"></tbody></table></div></div>
+    </div>
+
+    <!-- REFERRAL -->
+    <div id="sec-referral" class="dsec">
+      <div class="dh"><div class="dh-l"><h1>Referral Program</h1><p>Earn lifetime commissions by growing Willis HashVault</p></div><div class="dh-r"><button class="btn btn-primary btn-sm" onclick="copyRef()">Copy Referral Link</button></div></div>
+      <div class="reflayout">
+        <div>
+          <div class="dc" style="margin-bottom:16px"><div class="dch"><span class="dcht">Your Referral Link</span></div><div style="padding:20px"><div class="reflink"><span class="reflnktxt" id="reflnk">https://willishashvault.com/ref/MINER</span><button class="btn btn-primary btn-sm" onclick="copyRef()">Copy</button></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick="showToast('Twitter link copied!','suc')">Twitter</button><button class="btn btn-ghost btn-sm" onclick="showToast('Telegram link copied!','suc')">Telegram</button><button class="btn btn-ghost btn-sm" onclick="showToast('WhatsApp link ready!','suc')">WhatsApp</button></div></div></div>
+          <div class="dc" style="margin-bottom:16px"><div class="dch"><span class="dcht">Commission Structure</span></div><div style="padding:20px"><div class="reftiers"><div class="reftier" style="border:1px solid rgba(79,158,255,0.15)"><div><div class="rtlbl">Tier 1 - Direct Referrals</div><div class="rtdesc">Your direct sign-ups</div></div><div class="rtpct">8%</div></div><div class="reftier" style="border:1px solid rgba(0,212,161,0.15)"><div><div class="rtlbl">Tier 2 - Their Referrals</div><div class="rtdesc">People your referrals invite</div></div><div class="rtpct" style="color:var(--g)">3%</div></div><div class="reftier" style="border:1px solid rgba(255,179,71,0.15)"><div><div class="rtlbl">Tier 3 - Extended Network</div><div class="rtdesc">3rd degree connections</div></div><div class="rtpct" style="color:var(--o)">1%</div></div></div><div style="font-size:12px;color:var(--t3);text-align:center;padding:9px;background:rgba(255,255,255,0.03);border-radius:var(--rm)">Paid daily - No cap - Lifetime earnings</div></div></div>
+          <div class="dc"><div class="dch"><span class="dcht">Your Referrals</span></div><div class="reftbl"><div class="refrow"><div><div class="rrusr">James T. <span class="chip chg" style="margin-left:5px">Pro</span></div><div class="rrmeta">45 days ago - $2,280 mined</div></div><div class="rrearns">+$182.40/mo</div></div><div class="refrow"><div><div class="rrusr">Amara L. <span class="chip chb" style="margin-left:5px">Starter</span></div><div class="rrmeta">22 days ago - $880 mined</div></div><div class="rrearns">+$44.00/mo</div></div><div class="refrow"><div><div class="rrusr">Kevin O. <span class="chip chg" style="margin-left:5px">Pro</span></div><div class="rrmeta">12 days ago - $480 mined</div></div><div class="rrearns">+$38.40/mo</div></div></div></div>
+        </div>
+        <div>
+          <div class="dc" style="margin-bottom:16px"><div class="dch"><span class="dcht">Your Stats</span></div><div style="padding:16px"><div class="refsgrid"><div class="refs"><div class="rsval">$420</div><div class="rslbl">Total Earned</div></div><div class="refs"><div class="rsval">3</div><div class="rslbl">Referrals</div></div><div class="refs"><div class="rsval">$264</div><div class="rslbl">This Month</div></div><div class="refs"><div class="rsval">8%</div><div class="rslbl">Commission</div></div></div></div></div>
+          <div class="dc"><div class="dch"><span class="dcht">Monthly Commissions</span></div><div class="cwsm"><canvas id="refChart"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="sec-settings" class="dsec">
+      <div class="dh"><div class="dh-l"><h1>Settings</h1><p>Manage your profile, security and preferences</p></div></div>
+      <div class="setgrid">
+        <div>
+          <div class="dc" style="margin-bottom:16px"><div class="dch"><span class="dcht">Profile</span></div><div style="padding:20px">
+            <div class="fg"><label class="fl">Full Name</label><input type="text" class="fi" id="s-name" value="Willis Miner"></div>
+            <div class="fg"><label class="fl">Email Address</label><input type="email" class="fi" id="s-email" value="miner@willishashvault.com"></div>
+            <div class="fg"><label class="fl">Default Payout Address</label><input type="text" class="fi" value="1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf"></div>
+            <button class="btn btn-primary" onclick="showToast('Profile updated!','suc')">Save Changes</button>
+          </div></div>
+          <div class="dc dzcard"><div class="dch"><span class="dcht" style="color:var(--r)">Danger Zone</span></div>
+            <div class="dzitem"><div><div class="dztitle">Pause All Mining</div><div class="dzdesc">Suspend all active sessions</div></div><button class="btn btn-danger btn-sm" onclick="showToast('Mining paused.','warn')">Pause</button></div>
+            <div class="dzitem"><div><div class="dztitle">Delete Account</div><div class="dzdesc">Permanently delete all data</div></div><button class="btn btn-danger btn-sm" onclick="showToast('Contact support to delete account.','err')">Delete</button></div>
+          </div>
+        </div>
+        <div>
+          <div class="dc" style="margin-bottom:16px"><div class="dch"><span class="dcht">Security</span></div>
+            <div class="toglist">
+              <label class="togitem"><div class="toginfo"><span>Two-Factor Authentication</span><small>Protect withdrawals with 2FA</small></div><input type="checkbox" class="tog" checked onclick="open2FA()"></label>
+              <label class="togitem"><div class="toginfo"><span>Withdrawal Confirmations</span><small>Email for each withdrawal</small></div><input type="checkbox" class="tog" checked onchange="showToast('Setting updated.','suc')"></label>
+              <label class="togitem"><div class="toginfo"><span>Login Notifications</span><small>Email on new device login</small></div><input type="checkbox" class="tog" checked onchange="showToast('Setting updated.','suc')"></label>
+            </div>
+            <div style="padding:12px 20px;border-top:1px solid rgba(255,255,255,0.04)">
+              <button class="btn btn-ghost btn-sm" onclick="open2FA()">Setup 2FA</button>
+              <button class="btn btn-ghost btn-sm" style="margin-left:8px" onclick="showToast('Password reset sent!','suc')">Change Password</button>
+            </div>
+          </div>
+          <div class="dc"><div class="dch"><span class="dcht">Notifications</span></div>
+            <div class="toglist">
+              <label class="togitem"><div class="toginfo"><span>Daily Payout Alerts</span><small>Email when BTC is credited</small></div><input type="checkbox" class="tog" checked onchange="showToast('Saved.','suc')"></label>
+              <label class="togitem"><div class="toginfo"><span>Mining Session Alerts</span><small>Start and completion alerts</small></div><input type="checkbox" class="tog" checked onchange="showToast('Saved.','suc')"></label>
+              <label class="togitem"><div class="toginfo"><span>Price Alerts</span><small>BTC price movement alerts</small></div><input type="checkbox" class="tog" onchange="showToast('Saved.','suc')"></label>
+              <label class="togitem"><div class="toginfo"><span>Referral Earnings</span><small>When your referral earns</small></div><input type="checkbox" class="tog" checked onchange="showToast('Saved.','suc')"></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODALS -->
+<div id="modal-login" class="mov" onclick="ovClose(event,'login')">
+  <div class="modal"><button class="mclose" onclick="closeM('login')">&#10005;</button>
+    <div class="mbody">
+      <h2 class="mtitle">Welcome Back</h2>
+      <p class="msub">Sign in to your Willis HashVault account</p>
+      <div id="login-err" class="err-msg"></div>
+      <div class="fg"><label class="fl">Email Address</label><input type="email" class="fi" id="li-em" placeholder="you@example.com"></div>
+      <div class="fg"><label class="fl">Password</label><input type="password" class="fi" id="li-pw" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')login()"></div>
+      <div style="text-align:right;margin:-10px 0 14px"><a href="#" style="font-size:12px;color:var(--p)" onclick="showToast('Password reset email sent!','suc');return false">Forgot password?</a></div>
+      <button class="btn btn-primary w-full btn-lg" onclick="login()">Sign In</button>
+      <div class="mfoot">No account? <a href="#" onclick="switchM('login','register');return false">Start mining free</a></div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-register" class="mov" onclick="ovClose(event,'register')">
+  <div class="modal"><button class="mclose" onclick="closeM('register')">&#10005;</button>
+    <div class="mbody">
+      <h2 class="mtitle">Start Mining Today</h2>
+      <p class="msub">Create your free Willis HashVault account</p>
+      <div id="reg-err" class="err-msg"></div>
+      <div class="fg"><label class="fl">Full Name</label><input type="text" class="fi" id="rg-nm" placeholder="Your full name"></div>
+      <div class="fg"><label class="fl">Email Address</label><input type="email" class="fi" id="rg-em" placeholder="you@example.com"></div>
+      <div class="fg"><label class="fl">Password</label><input type="password" class="fi" id="rg-pw" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')register()"></div>
+      <div class="fg"><label class="fl">Referral Code (optional)</label><input type="text" class="fi" id="rg-ref" placeholder="Leave blank if none"></div>
+      <button class="btn btn-primary w-full btn-lg" onclick="register()">Create Free Account</button>
+      <p style="font-size:10px;color:var(--t3);text-align:center;margin-top:10px">By signing up you agree to our <a href="#" style="color:var(--p)">Terms</a> and <a href="#" style="color:var(--p)">Privacy Policy</a></p>
+      <div class="mfoot">Already a miner? <a href="#" onclick="switchM('register','login');return false">Sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-withdraw" class="mov" onclick="ovClose(event,'withdraw')">
+  <div class="modal modal-lg"><button class="mclose" onclick="closeM('withdraw')">&#10005;</button>
+    <div class="mbody">
+      <h2 class="mtitle">Withdraw Bitcoin</h2>
+      <p class="msub">Send BTC to your external wallet</p>
+      <div style="text-align:center;padding:16px;background:rgba(79,158,255,0.06);border-radius:var(--rm);margin-bottom:20px;border:1px solid rgba(79,158,255,0.12)">
+        <div style="font-size:11px;color:var(--t3);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.05em">Available Balance</div>
+        <div class="gt" style="font-size:28px;font-weight:800">0.04213 BTC</div>
+        <div style="font-size:12px;color:var(--t3);margin-top:3px">approx $2,840.00 USD</div>
+      </div>
+      <div class="fg"><label class="fl">Recipient BTC Address</label><input type="text" class="fi" id="w-addr" placeholder="Enter BTC wallet address"></div>
+      <div class="fg"><label class="fl">Amount (BTC)</label><div class="ia"><input type="number" class="fi" id="w-amt" placeholder="0.00000000" step="0.00000001" oninput="updW()"><span class="iad" onclick="document.getElementById('w-amt').value='0.04208';updW()">MAX</span></div></div>
+      <div style="background:rgba(255,255,255,0.03);border-radius:var(--rm);padding:14px;margin:16px 0">
+        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;color:var(--t2);border-bottom:1px solid rgba(255,255,255,0.04)"><span>Amount</span><span id="wd-amt" style="color:var(--t1);font-weight:600">0.00000000 BTC</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;color:var(--t2);border-bottom:1px solid rgba(255,255,255,0.04)"><span>Network Fee</span><span style="color:var(--r);font-weight:600">-0.00005 BTC</span></div>
+        <div style="display:flex;justify-content:space-between;padding:9px 0 0;font-size:15px;font-weight:700"><span>You Receive</span><span id="wd-rcv" style="color:var(--g)">0.00000000 BTC</span></div>
+      </div>
+      <button class="btn btn-primary w-full btn-lg" onclick="submitW()">Confirm Withdrawal</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-deposit" class="mov" onclick="ovClose(event,'deposit')">
+  <div class="modal"><button class="mclose" onclick="closeM('deposit')">&#10005;</button>
+    <div class="mbody" style="text-align:center">
+      <h2 class="mtitle">Deposit Bitcoin</h2>
+      <p class="msub">Send BTC to your Willis HashVault address</p>
+      <div class="qrwrap">
+        <svg viewBox="0 0 100 100" width="150" height="150" style="image-rendering:pixelated">
+          <rect width="100" height="100" fill="white"/>
+          <rect x="10" y="10" width="30" height="30" fill="#080b12"/><rect x="12" y="12" width="26" height="26" fill="white"/><rect x="14" y="14" width="22" height="22" fill="#080b12"/>
+          <rect x="60" y="10" width="30" height="30" fill="#080b12"/><rect x="62" y="12" width="26" height="26" fill="white"/><rect x="64" y="14" width="22" height="22" fill="#080b12"/>
+          <rect x="10" y="60" width="30" height="30" fill="#080b12"/><rect x="12" y="62" width="26" height="26" fill="white"/><rect x="14" y="64" width="22" height="22" fill="#080b12"/>
+          <rect x="45" y="15" width="5" height="5" fill="#080b12"/><rect x="52" y="15" width="5" height="5" fill="#080b12"/>
+          <rect x="45" y="22" width="5" height="5" fill="#080b12"/><rect x="52" y="28" width="5" height="5" fill="#080b12"/>
+          <rect x="15" y="45" width="5" height="5" fill="#080b12"/><rect x="22" y="45" width="5" height="5" fill="#080b12"/>
+          <rect x="28" y="52" width="5" height="5" fill="#080b12"/><rect x="15" y="52" width="5" height="5" fill="#080b12"/>
+          <rect x="45" y="45" width="5" height="5" fill="#080b12"/><rect x="60" y="45" width="5" height="5" fill="#080b12"/>
+          <rect x="67" y="45" width="5" height="5" fill="#080b12"/><rect x="45" y="52" width="5" height="5" fill="#080b12"/>
+          <rect x="60" y="52" width="5" height="5" fill="#080b12"/><rect x="45" y="60" width="5" height="5" fill="#080b12"/>
+          <rect x="52" y="60" width="5" height="5" fill="#080b12"/><rect x="67" y="60" width="5" height="5" fill="#080b12"/>
+          <rect x="75" y="67" width="5" height="5" fill="#080b12"/><rect x="45" y="75" width="5" height="5" fill="#080b12"/>
+        </svg>
+      </div>
+      <div class="qraddr">1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf</div>
+      <div class="copybtn" onclick="showToast('Address copied!','suc')">Copy Address</div>
+      <div style="margin-top:14px;padding:10px;background:rgba(255,179,71,0.06);border:1px solid rgba(255,179,71,0.15);border-radius:var(--rm)"><p style="font-size:11px;color:var(--o)">Send BTC only. Confirms after 3 network confirmations.</p></div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-upgrade" class="mov" onclick="ovClose(event,'upgrade')">
+  <div class="modal modal-lg"><button class="mclose" onclick="closeM('upgrade')">&#10005;</button>
+    <div class="mbody">
+      <div id="upg1">
+        <h2 class="mtitle">Upgrade Your Plan</h2>
+        <p class="msub">More power. More Bitcoin. More profit.</p>
+        <div class="upsteps" style="margin-bottom:20px">
+          <div class="ups act"><div class="upsn">1</div><span>Choose</span></div>
+          <div class="upsline"></div>
+          <div class="ups"><div class="upsn">2</div><span>Payment</span></div>
+          <div class="upsline"></div>
+          <div class="ups"><div class="upsn">3</div><span>Done</span></div>
+        </div>
+        <div class="planpicker">
+          <div class="ppc sel" onclick="selUpg(this,'Pro','$249')"><div class="ppn">Pro Plan</div><div class="ppp">$249<span style="font-size:13px;font-weight:400;color:var(--t3)">/mo</span></div><div class="ppr">0.015 BTC/day</div></div>
+          <div class="ppc" onclick="selUpg(this,'Enterprise','$499')"><div class="ppn">Enterprise</div><div class="ppp">$499<span style="font-size:13px;font-weight:400;color:var(--t3)">/mo</span></div><div class="ppr">0.035 BTC/day</div></div>
+          <div class="ppc" onclick="selUpg(this,'Elite','$999')"><div class="ppn">Elite Plan</div><div class="ppp">$999<span style="font-size:13px;font-weight:400;color:var(--t3)">/mo</span></div><div class="ppr">0.075 BTC/day</div></div>
+          <div class="ppc" onclick="selUpg(this,'Titan','$2499')"><div class="ppn">Titan</div><div class="ppp">$2,499<span style="font-size:13px;font-weight:400;color:var(--t3)">/mo</span></div><div class="ppr">0.2 BTC/day</div></div>
+        </div>
+        <button class="btn btn-primary w-full btn-lg" onclick="upgStep(2)">Continue to Payment</button>
+      </div>
+      <div id="upg2" style="display:none">
+        <h2 class="mtitle">Payment Details</h2>
+        <p class="msub">Upgrading to <strong id="upg-pname">Pro Plan</strong> at <strong id="upg-pprice">$249/mo</strong></p>
+        <div class="fg"><label class="fl">Cardholder Name</label><input type="text" class="fi" placeholder="Willis Miner"></div>
+        <div class="fg"><label class="fl">Card Number</label><input type="text" class="fi" placeholder="4242 4242 4242 4242" maxlength="19" oninput="fmtCard(this)"></div>
+        <div class="cardflds">
+          <div class="fg"><label class="fl">Expiry</label><input type="text" class="fi" placeholder="MM / YY" maxlength="7" oninput="fmtExp(this)"></div>
+          <div class="fg"><label class="fl">CVV</label><input type="text" class="fi" placeholder="123" maxlength="4"></div>
+        </div>
+        <div style="display:flex;gap:9px">
+          <button class="btn btn-ghost btn-lg" style="flex:0 0 auto" onclick="upgStep(1)">Back</button>
+          <button class="btn btn-primary btn-lg" style="flex:1" onclick="upgStep(3)">Confirm Payment</button>
+        </div>
+      </div>
+      <div id="upg3" style="display:none;text-align:center;padding:16px 0">
+        <div style="font-size:56px;margin-bottom:12px">&#127881;</div>
+        <h2 class="mtitle">Upgrade Successful!</h2>
+        <p style="color:var(--t2);margin-bottom:20px;font-size:14px">Your <span id="upg-cname" style="color:var(--p);font-weight:700">Pro Plan</span> is now active. Mining started!</p>
+        <button class="btn btn-primary btn-lg" onclick="closeM('upgrade');showSec('overview',document.querySelector('.sl'))">Go to Dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-twofa" class="mov" onclick="ovClose(event,'twofa')">
+  <div class="modal"><button class="mclose" onclick="closeM('twofa')">&#10005;</button>
+    <div class="mbody">
+      <h2 class="mtitle">Setup Two-Factor Auth</h2>
+      <p class="msub">Scan with Google Authenticator then verify</p>
+      <div style="width:120px;height:120px;background:white;border-radius:var(--rm);margin:0 auto 12px;display:grid;place-items:center;font-size:44px">&#128272;</div>
+      <div style="font-family:var(--fm);font-size:12px;background:var(--bg);padding:9px 14px;border-radius:var(--rm);text-align:center;color:var(--p);letter-spacing:0.08em;margin:0 0 14px">WILLI SHAV AULT 2FA KEY 72</div>
+      <p style="font-size:12px;color:var(--t2);margin-bottom:14px;text-align:center">Enter the 6-digit code from your authenticator app</p>
+      <div class="otprow">
+        <input class="otpin" type="text" maxlength="1" oninput="otpnxt(this,1)">
+        <input class="otpin" type="text" maxlength="1" oninput="otpnxt(this,2)">
+        <input class="otpin" type="text" maxlength="1" oninput="otpnxt(this,3)">
+        <input class="otpin" type="text" maxlength="1" oninput="otpnxt(this,4)">
+        <input class="otpin" type="text" maxlength="1" oninput="otpnxt(this,5)">
+        <input class="otpin" type="text" maxlength="1" oninput="otpnxt(this,6)">
+      </div>
+      <button class="btn btn-primary w-full btn-lg" onclick="verify2FA()">Verify and Enable 2FA</button>
+    </div>
+  </div>
+</div>
+
+<div id="chatwid">
+  <div class="chatpanel" id="chatpanel">
+    <div class="chathead">
+      <div><div class="chtitle">Willis HashVault Support</div><div class="chsub">Online - Reply under 2 min</div></div>
+      <button onclick="toggleChat()" style="color:rgba(0,0,0,0.6);font-size:16px;background:none;border:none;cursor:pointer;font-family:var(--fs)">&#10005;</button>
+    </div>
+    <div class="chatmsgs" id="chatmsgs">
+      <div class="msg msg-b">Hi! I am your Willis HashVault assistant. How can I help you today?</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:3px">
+        <button onclick="qReply('How do withdrawals work?')" style="font-size:10px;padding:4px 9px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--rf);color:var(--t2);cursor:pointer;font-family:var(--fs)">Withdrawals</button>
+        <button onclick="qReply('Tell me about referrals')" style="font-size:10px;padding:4px 9px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--rf);color:var(--t2);cursor:pointer;font-family:var(--fs)">Referral</button>
+        <button onclick="qReply('How do I upgrade my plan?')" style="font-size:10px;padding:4px 9px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--rf);color:var(--t2);cursor:pointer;font-family:var(--fs)">Upgrade</button>
+      </div>
+    </div>
+    <div class="chatinpr">
+      <input class="chatinp" id="chatinp" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="chatsend" onclick="sendChat()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+    </div>
+  </div>
+  <div class="chatbtn" onclick="toggleChat()">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <div class="chatnot" id="chatnot"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+var BTC_PRICE = 67420;
+var txFilter = 'all';
+var chatOpen = false;
+var notifUnread = 4;
+var heroMining = false;
+var heroSecs = 0;
+var heroIv = null;
+var heroEarned = 0;
+var btcPS = 0.005 / 86400;
+var dashMining = false;
+var dashSecs = 0;
+var dashIv = null;
+var dashEarned = 0;
+var hashIv = null;
+var nextPaySecs = 23160;
+var upgradeP = 'Pro';
+var upgradePrice = '$249';
+var user = null;
+var eChart = null, aChart = null, pChart = null, hrChart = null, wChart = null, rChart = null;
+
+var PRICES = [
+  {s:'BTC',p:67420,c:'+2.84'},{s:'ETH',p:3498,c:'+1.92'},{s:'LTC',p:90.12,c:'+0.74'},
+  {s:'BNB',p:612,c:'-0.43'},{s:'SOL',p:182,c:'+3.21'},{s:'XRP',p:0.612,c:'+1.08'},
+  {s:'DOGE',p:0.152,c:'+5.44'},{s:'ADA',p:0.482,c:'-0.92'}
+];
+var TKDATA = [
+  {u:'J***n',a:'0.01418 BTC',h:'0x7f3...9e2',t:'2m'},{u:'M***a',a:'0.00923 BTC',h:'0x2b8...4f1',t:'5m'},
+  {u:'R***s',a:'0.03512 BTC',h:'0x9d1...7a3',t:'8m'},{u:'K***y',a:'0.00501 BTC',h:'0x4c5...2e8',t:'11m'},
+  {u:'D***e',a:'0.01200 BTC',h:'0x1a2...6c7',t:'14m'},{u:'S***h',a:'0.02840 BTC',h:'0x8e9...0a1',t:'17m'},
+  {u:'T***r',a:'0.00750 BTC',h:'0x3c4...5e6',t:'20m'},{u:'L***a',a:'0.04200 BTC',h:'0xc1d...3e4',t:'23m'}
+];
+var NOTIFS = [
+  {ic:'M',bg:'rgba(0,212,161,0.15)',t:'Mining Reward Credited',m:'+0.01418 BTC - 2h ago',u:true},
+  {ic:'P',bg:'rgba(79,158,255,0.15)',t:'BTC Price Alert',m:'Bitcoin up 4.2% - 3h ago',u:true},
+  {ic:'R',bg:'rgba(123,94,167,0.15)',t:'New Referral Joined',m:'James T. activated Pro - 1d ago',u:true},
+  {ic:'S',bg:'rgba(255,179,71,0.15)',t:'New Login Detected',m:'London, UK - Chrome - 2d ago',u:true},
+  {ic:'W',bg:'rgba(79,158,255,0.15)',t:'Withdrawal Processed',m:'0.01000 BTC sent - 3d ago',u:false}
+];
+var TXNS = [
+  {type:'mining',hash:'0x7f3a...9e2d',btc:'+0.00124',usd:'+$83.60',date:'2h ago',st:'confirmed'},
+  {type:'withdrawal',hash:'0x2b8c...4f1a',btc:'-0.01000',usd:'-$674.20',date:'1d ago',st:'confirmed'},
+  {type:'mining',hash:'0x9d1e...7a3f',btc:'+0.00089',usd:'+$59.97',date:'1d ago',st:'confirmed'},
+  {type:'fee',hash:'0x4c5b...2e8d',btc:'-0.00012',usd:'-$8.09',date:'2d ago',st:'confirmed'},
+  {type:'mining',hash:'0x1a2b...6c7d',btc:'+0.00203',usd:'+$136.84',date:'3d ago',st:'confirmed'},
+  {type:'withdrawal',hash:'0x8e9f...0a1b',btc:'-0.02000',usd:'-$1,348.40',date:'5d ago',st:'confirmed'},
+  {type:'mining',hash:'0x3c4d...5e6f',btc:'+0.00156',usd:'+$105.17',date:'6d ago',st:'confirmed'},
+  {type:'fee',hash:'0xc1d2...3e4f',btc:'-0.00018',usd:'-$12.14',date:'7d ago',st:'confirmed'}
+];
+var ACTS = [
+  {ic:'M',bg:'rgba(0,212,161,0.15)',t:'Mining Reward',m:'2 hours ago',a:'+$83.60',c:'pos'},
+  {ic:'W',bg:'rgba(79,158,255,0.15)',t:'Withdrawal Processed',m:'1 day ago',a:'-$674.20',c:'neg'},
+  {ic:'M',bg:'rgba(0,212,161,0.15)',t:'Mining Reward',m:'1 day ago',a:'+$59.97',c:'pos'},
+  {ic:'F',bg:'rgba(123,94,167,0.15)',t:'Power Fee Deducted',m:'2 days ago',a:'-$8.09',c:'neg'},
+  {ic:'M',bg:'rgba(0,212,161,0.15)',t:'Mining Reward',m:'3 days ago',a:'+$136.84',c:'pos'}
+];
+var CHARTDATA = {
+  '7d':{l:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],d:[142,98,187,134,212,167,234]},
+  '30d':{l:['W1','W2','W3','W4'],d:[980,1240,1100,1420]},
+  '90d':{l:['Jan','Feb','Mar'],d:[3200,4100,3870]},
+  '1y':{l:['J','F','M','A','M','J','J','A','S','O','N','D'],d:[2100,2400,2800,3100,2700,3400,3200,3800,3500,4200,3900,4800]}
+};
+var CHATANS = {
+  withdraw:'Withdrawals process in about 30 minutes. Go to Wallet then Withdraw. Enter your BTC address and amount. Minimum 0.0001 BTC.',
+  referral:'You earn 8% on every payout your referrals receive for life! Plus 3% Tier 2 and 1% Tier 3. Find your link in the Referral section.',
+  upgrade:'Click Upgrade Plan in the sidebar to see all options. Upgrades activate instantly.',
+  payout:'Payouts happen automatically every 24 hours. Check your Overview for the next payout countdown.',
+  def:'Great question! Our support team will follow up within 2 minutes. Is there anything else I can help with?'
+};
+var HEX = '0123456789abcdef';
+
+window.addEventListener('scroll', function() {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  initPriceBar();
+  initTicker();
+  initActivities();
+  initTx();
+  initNetBar();
+  updateCalc();
+  updateMine();
+  initNotifList();
+  setTimeout(function() {
+    var cn = document.getElementById('chatnot');
+    if (cn) { cn.textContent = '1'; cn.style.display = 'flex'; }
+  }, 3000);
+});
+
+function initPriceBar() {
+  var el = document.getElementById('pbar-inner');
+  if (!el) return;
+  var all = PRICES.concat(PRICES);
+  var html = '';
+  for (var i = 0; i < all.length; i++) {
+    var p = all[i];
+    var up = parseFloat(p.c) >= 0;
+    var px = p.p < 10 ? p.p.toFixed(3) : p.p.toLocaleString();
+    html += '<div class="pi"><span class="pi-sym">' + p.s + '</span><span class="pi-px">$' + px + '</span><span class="pi-ch ' + (up ? 'up' : 'dn') + '">' + (up ? '+' : '') + p.c + '%</span></div>';
+  }
+  el.innerHTML = html;
+  setInterval(function() {
+    PRICES[0].p = Math.max(60000, PRICES[0].p + (Math.random() - 0.5) * 200);
+    var e = document.getElementById('nb-btc');
+    if (e) e.textContent = '$' + Math.round(PRICES[0].p).toLocaleString();
+  }, 4000);
+}
+
+function initTicker() {
+  var el = document.getElementById('lticker');
+  if (!el) return;
+  var all = TKDATA.concat(TKDATA);
+  var html = '';
+  for (var i = 0; i < all.length; i++) {
+    var d = all[i];
+    html += '<div class="tki"><span class="tkamt">' + d.a + '</span><span class="tkhash">' + d.h + '</span><span style="font-size:10px;color:var(--t2)">' + d.u + '</span><span class="tkbadge">Paid</span><span style="font-size:10px;color:var(--t3)">' + d.t + ' ago</span></div>';
+  }
+  el.innerHTML = html;
+}
+
+function initNetBar() {
+  var n = 47241;
+  setInterval(function() {
+    n += Math.floor(Math.random() * 3);
+    var nm = document.getElementById('nb-min');
+    var ac = document.getElementById('actcount');
+    if (nm) nm.textContent = n.toLocaleString();
+    if (ac) ac.textContent = n.toLocaleString() + ' miners earning right now';
+  }, 3000);
+}
+
+function selPlan(btn, bpd, days, cost, hr) {
+  var btns = document.querySelectorAll('.plan-btn');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  btn.classList.add('active');
+  btcPS = bpd / 86400;
+  document.getElementById('hrate').textContent = hr;
+  if (!heroMining) document.getElementById('hstatus').textContent = bpd + ' BTC/day - ' + hr + ' - $' + cost + '/mo';
+}
+
+function heroMine() {
+  if (!heroMining) {
+    heroMining = true; heroEarned = 0; heroSecs = 0;
+    document.getElementById('hminebtn').textContent = 'Stop Demo';
+    document.getElementById('hstatus').textContent = 'Mining in progress - BTC accumulating...';
+    startHash('hhash');
+    heroIv = setInterval(function() {
+      heroSecs++; heroEarned += btcPS;
+      document.getElementById('htimer').textContent = fmtT(heroSecs);
+      document.getElementById('hearned').textContent = heroEarned.toFixed(5);
+    }, 1000);
+  } else {
+    heroMining = false; clearInterval(heroIv); stopHash();
+    document.getElementById('hminebtn').textContent = 'Start Free Demo Mining';
+    document.getElementById('hstatus').textContent = 'Demo paused - Sign up to keep your earnings';
+    document.getElementById('hhash').textContent = 'Mining paused.';
+    showToast('Demo ended. Sign up to keep your BTC!', 'inf');
+  }
+}
+
+function rndH() {
+  var s = '';
+  for (var i = 0; i < 60; i++) s += HEX[Math.floor(Math.random() * 16)];
+  return s;
+}
+function startHash(id) {
+  stopHash();
+  hashIv = setInterval(function() {
+    var e = document.getElementById(id);
+    if (e) e.textContent = rndH() + '\n' + rndH();
+  }, 200);
+}
+function stopHash() { clearInterval(hashIv); }
+
+function updateCalc() {
+  var hr = parseInt(document.getElementById('pchr').value);
+  var days = parseInt(document.getElementById('pcdur').value);
+  var px = parseInt(document.getElementById('pcpx').value);
+  document.getElementById('pchval').textContent = hr >= 1000 ? (hr / 1000).toFixed(1) + ' PH/s' : hr + ' TH/s';
+  var db = hr / 240 * 0.015;
+  var tb = db * days;
+  var gross = tb * px;
+  var fees = gross * 0.055;
+  var net = gross - fees;
+  var planCost = Math.round(hr / 240 * 249) * days / 30;
+  var roi = planCost > 0 ? ((net - planCost) / planCost * 100) : 0;
+  document.getElementById('pc-dbtc').textContent = db.toFixed(5) + ' BTC';
+  document.getElementById('pc-dusd').textContent = '$' + (db * px).toFixed(2);
+  document.getElementById('pc-tbtc').textContent = tb.toFixed(5) + ' BTC';
+  document.getElementById('pc-fees').textContent = '-$' + fees.toFixed(2);
+  document.getElementById('pc-net').textContent = '$' + net.toFixed(2);
+  document.getElementById('pc-roi').textContent = roi.toFixed(0) + '%';
+}
+
+function dismissCookie() {
+  document.getElementById('cookie').classList.add('gone');
+}
+
+function openM(n) {
+  document.getElementById('modal-' + n).classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeM(n) {
+  document.getElementById('modal-' + n).classList.remove('active');
+  document.body.style.overflow = '';
+}
+function switchM(f, t) { closeM(f); setTimeout(function() { openM(t); }, 200); }
+function ovClose(e, n) { if (e.target === e.currentTarget) closeM(n); }
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    var mods = document.querySelectorAll('.mov.active');
+    for (var i = 0; i < mods.length; i++) mods[i].classList.remove('active');
+    document.body.style.overflow = '';
+  }
+});
+
+function login() {
+  var em = document.getElementById('li-em').value.trim();
+  var pw = document.getElementById('li-pw').value;
+  var err = document.getElementById('login-err');
+  err.classList.remove('show');
+  if (!em || !pw) { err.textContent = 'Please fill in all fields.'; err.classList.add('show'); return; }
+  if (em.indexOf('@') < 0) { err.textContent = 'Please enter a valid email address.'; err.classList.add('show'); return; }
+  if (pw.length < 6) { err.textContent = 'Password must be at least 6 characters.'; err.classList.add('show'); return; }
+  user = {name: fmtName(em), email: em, plan: 'Starter Plan'};
+  closeM('login');
+  enterDash();
+}
+
+function register() {
+  var nm = document.getElementById('rg-nm').value.trim();
+  var em = document.getElementById('rg-em').value.trim();
+  var pw = document.getElementById('rg-pw').value;
+  var err = document.getElementById('reg-err');
+  err.classList.remove('show');
+  if (!nm || !em || !pw) { err.textContent = 'Please fill in all fields.'; err.classList.add('show'); return; }
+  if (em.indexOf('@') < 0) { err.textContent = 'Please enter a valid email address.'; err.classList.add('show'); return; }
+  if (pw.length < 6) { err.textContent = 'Password must be at least 6 characters.'; err.classList.add('show'); return; }
+  user = {name: nm, email: em, plan: 'Starter Plan'};
+  closeM('register');
+  enterDash();
+  showToast('Welcome to Willis HashVault, ' + nm + '!', 'suc');
+}
+
+function fmtName(em) {
+  var n = em.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' ');
+  var words = n.split(' ');
+  var result = '';
+  for (var i = 0; i < words.length; i++) {
+    if (words[i].length > 0) result += words[i].charAt(0).toUpperCase() + words[i].slice(1) + ' ';
+  }
+  return result.trim() || 'Miner';
+}
+
+function logout() {
+  user = null;
+  if (dashMining) { dashMining = false; clearInterval(dashIv); }
+  if (heroMining) { heroMining = false; clearInterval(heroIv); }
+  stopHash(); destroyCharts();
+  var dbd = document.getElementById('dashboard');
+  dbd.classList.add('hidden'); dbd.style.display = 'none';
+  document.getElementById('landing').classList.remove('hidden');
+  document.body.style.overflow = '';
+  window.scrollTo(0, 0);
+  showToast('Signed out successfully!', 'suc');
+}
+
+function enterDash() {
+  var first = user.name.split(' ')[0];
+  var parts = user.name.split(' ');
+  var ini = '';
+  for (var i = 0; i < parts.length && i < 2; i++) { if (parts[i]) ini += parts[i].charAt(0); }
+  ini = ini.toUpperCase() || 'WH';
+  document.getElementById('dash-av').textContent = ini;
+  document.getElementById('dash-nm').textContent = user.name;
+  document.getElementById('dash-greet').textContent = first;
+  document.getElementById('reflnk').textContent = 'https://willishashvault.com/ref/' + ini + Math.floor(Math.random() * 9999);
+  document.getElementById('landing').classList.add('hidden');
+  var dbd = document.getElementById('dashboard');
+  dbd.classList.remove('hidden');
+  dbd.style.display = 'flex';
+  showSec('overview', document.querySelector('.sl'));
+  startPayCd();
+  showToast('Welcome back, ' + first + '!', 'suc');
+  setTimeout(function() { initCharts(); }, 100);
+}
+
+function showSec(n, lnk) {
+  var secs = document.querySelectorAll('.dsec');
+  for (var i = 0; i < secs.length; i++) secs[i].classList.remove('active');
+  var links = document.querySelectorAll('.sl');
+  for (var i = 0; i < links.length; i++) links[i].classList.remove('active');
+  var sec = document.getElementById('sec-' + n);
+  if (sec) sec.classList.add('active');
+  if (lnk) lnk.classList.add('active');
+  if (n === 'mining' && !hrChart) setTimeout(initHRChart, 80);
+  if (n === 'wallet' && !wChart) setTimeout(initWChart, 80);
+  if (n === 'referral' && !rChart) setTimeout(initRChart, 80);
+  if (window.innerWidth <= 1100) document.getElementById('sidebar').classList.remove('open');
+}
+
+function mkGrad(ctx, c1, c2) {
+  var g = ctx.createLinearGradient(0, 0, 0, 260);
+  g.addColorStop(0, c1); g.addColorStop(1, c2); return g;
+}
+var cOpts = {
+  plugins: {
+    legend: {display: false},
+    tooltip: {backgroundColor:'#0e1420',borderColor:'rgba(79,158,255,0.3)',borderWidth:1,titleColor:'#f0f4ff',bodyColor:'#8899bb',padding:10}
+  },
+  scales: {
+    x: {grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#4a5568'}},
+    y: {grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#4a5568'}}
+  },
+  responsive: true,
+  maintainAspectRatio: false
+};
+
+function initCharts() {
+  var ec = document.getElementById('earningsChart');
+  if (ec && !eChart) {
+    var g = mkGrad(ec.getContext('2d'), 'rgba(79,158,255,0.45)', 'rgba(79,158,255,0)');
+    var d = CHARTDATA['7d'];
+    eChart = new Chart(ec, {type:'line',data:{labels:d.l,datasets:[{label:'$',data:d.d,borderColor:'#4f9eff',backgroundColor:g,borderWidth:2.5,pointBackgroundColor:'#4f9eff',pointBorderColor:'#0e1420',pointBorderWidth:2,pointRadius:4,fill:true,tension:0.4}]},options:cOpts});
+  }
+  var ac = document.getElementById('assetChart');
+  if (ac && !aChart) {
+    aChart = new Chart(ac, {type:'doughnut',data:{labels:['BTC','ETH','LTC','USDT'],datasets:[{data:[2840,2945,1125,450],backgroundColor:['rgba(255,179,71,0.8)','rgba(99,102,241,0.8)','rgba(0,212,161,0.8)','rgba(79,158,255,0.8)'],borderColor:'#0e1420',borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8899bb',padding:10,font:{size:11}}},tooltip:{backgroundColor:'#0e1420',padding:10,titleColor:'#f0f4ff',bodyColor:'#8899bb'}}}});
+  }
+  var pc = document.getElementById('perfChart');
+  if (pc && !pChart) {
+    var pcOpts = JSON.parse(JSON.stringify(cOpts));
+    pcOpts.scales.y.min = 60; pcOpts.scales.y.max = 100;
+    pcOpts.scales.y.ticks = {color:'#4a5568',callback:function(v){return v+'%'}};
+    pChart = new Chart(pc, {type:'bar',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{data:[75,82,78,80,76,84,78],backgroundColor:'rgba(79,158,255,0.3)',borderColor:'#4f9eff',borderWidth:2,borderRadius:4}]},options:pcOpts});
+  }
+}
+
+function switchChart(p, btn) {
+  var tabs = document.querySelectorAll('.tabrow .tb');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+  btn.classList.add('active');
+  if (!eChart) return;
+  var d = CHARTDATA[p];
+  eChart.data.labels = d.l; eChart.data.datasets[0].data = d.d; eChart.update();
+}
+
+function initHRChart() {
+  var el = document.getElementById('hrChart');
+  if (!el || hrChart) return;
+  var g = mkGrad(el.getContext('2d'), 'rgba(0,212,161,0.4)', 'rgba(0,212,161,0)');
+  var lbs = []; var dat = [];
+  for (var i = 0; i < 24; i++) { lbs.push(i + ':00'); dat.push(220 + Math.random() * 40 - 20); }
+  hrChart = new Chart(el, {type:'line',data:{labels:lbs,datasets:[{label:'TH/s',data:dat,borderColor:'#00d4a1',backgroundColor:g,borderWidth:2,fill:true,tension:0.4,pointRadius:0}]},options:cOpts});
+}
+
+function initWChart() {
+  var el = document.getElementById('walChart');
+  if (!el || wChart) return;
+  wChart = new Chart(el, {type:'line',data:{labels:['W1','W2','W3','W4','W5','W6','W7','W8'],datasets:[{label:'$',data:[1200,2100,1800,3200,2800,4100,3700,7360],borderColor:'#00d4a1',backgroundColor:'rgba(0,212,161,0.15)',borderWidth:2.5,fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:'#00d4a1'}]},options:cOpts});
+}
+
+function initRChart() {
+  var el = document.getElementById('refChart');
+  if (!el || rChart) return;
+  rChart = new Chart(el, {type:'bar',data:{labels:['Jan','Feb','Mar','Apr','May','Jun'],datasets:[{label:'$',data:[28,44,72,96,180,264],backgroundColor:'rgba(79,158,255,0.4)',borderColor:'#4f9eff',borderWidth:2,borderRadius:6}]},options:cOpts});
+}
+
+function destroyCharts() {
+  var cs = [eChart,aChart,pChart,hrChart,wChart,rChart];
+  for (var i = 0; i < cs.length; i++) if (cs[i]) cs[i].destroy();
+  eChart = aChart = pChart = hrChart = wChart = rChart = null;
+}
+
+function initActivities() {
+  var el = document.getElementById('actlist');
+  if (!el) return;
+  var html = '';
+  for (var i = 0; i < ACTS.length; i++) {
+    var a = ACTS[i];
+    html += '<div class="actitem"><div class="actic" style="background:' + a.bg + '">' + a.ic + '</div><div style="flex:1"><div class="acttitle">' + a.t + '</div><div class="actmeta">' + a.m + '</div></div><div class="actamt ' + a.c + '">' + a.a + '</div></div>';
+  }
+  el.innerHTML = html;
+}
+
+function initTx() { renderTx(TXNS); }
+function filterTx(type, btn) {
+  txFilter = type;
+  var tabs = document.querySelectorAll('.tabrow .tb');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+  btn.classList.add('active');
+  var filtered = [];
+  for (var i = 0; i < TXNS.length; i++) { if (type === 'all' || TXNS[i].type === type) filtered.push(TXNS[i]); }
+  renderTx(filtered);
+}
+function renderTx(txs) {
+  var tb = document.getElementById('tx-tbody');
+  if (!tb) return;
+  if (!txs.length) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--t3)">No transactions found</td></tr>'; return; }
+  var cm = {mining:'chg',withdrawal:'chb',fee:'chr'};
+  var html = '';
+  for (var i = 0; i < txs.length; i++) {
+    var t = txs[i];
+    var ac = t.btc.charAt(0) === '+' ? 'var(--g)' : 'var(--r)';
+    var sc = t.st === 'confirmed' ? 'sdot-g' : t.st === 'pending' ? 'sdot-o' : 'sdot-r';
+    html += '<tr><td><span class="chip ' + (cm[t.type]||'chm') + '">' + t.type.charAt(0).toUpperCase() + t.type.slice(1) + '</span></td><td><span class="txhash">' + t.hash + '</span></td><td style="font-family:var(--fm);font-weight:700;color:' + ac + '">' + t.btc + '</td><td style="color:var(--t2)">' + t.usd + '</td><td style="color:var(--t3)">' + t.date + '</td><td><span class="txst"><span class="sdot ' + sc + '"></span>' + t.st.charAt(0).toUpperCase() + t.st.slice(1) + '</span></td></tr>';
+  }
+  tb.innerHTML = html;
+}
+
+function onSlide(el) { document.getElementById('slideval').textContent = el.value + ' TH/s'; updateMine(); }
+function updateMine() {
+  var hr = parseInt(document.getElementById('mslide').value);
+  var dh = parseInt(document.getElementById('mdur').value);
+  var rph = hr / 240 * 0.015 / 24;
+  var gross = rph * dh; var fee = gross * 0.055; var net = gross - fee;
+  var dl = dh >= 168 ? '7 Days' : dh >= 24 ? (dh/24) + ' Day' + (dh>24?'s':'') : dh + ' Hour' + (dh>1?'s':'');
+  document.getElementById('sm-rate').textContent = (rph*24).toFixed(5) + ' BTC';
+  document.getElementById('sm-dur').textContent = dl;
+  document.getElementById('sm-fee').textContent = '-' + fee.toFixed(5) + ' BTC';
+  document.getElementById('sm-net').textContent = net.toFixed(5) + ' BTC';
+  document.getElementById('sm-usd').textContent = 'approx $' + (net * BTC_PRICE).toFixed(2);
+}
+
+function dashMine() {
+  var btn = document.getElementById('dminebtn');
+  if (!dashMining) {
+    dashMining = true; dashEarned = 0; dashSecs = 0;
+    var hr = parseInt(document.getElementById('mslide').value);
+    var dh = parseInt(document.getElementById('mdur').value);
+    var rps = hr / 240 * 0.015 / 86400;
+    document.getElementById('mbdot').style.background = 'var(--g)';
+    document.getElementById('mbtext').textContent = 'Mining Active';
+    document.getElementById('mbtext').style.color = 'var(--g)';
+    document.getElementById('dses-status').textContent = 'Session running...';
+    btn.textContent = 'Stop Session';
+    showToast('Mining session started! BTC accumulating.', 'suc');
+    startHash('dashash');
+    dashIv = setInterval(function() {
+      dashSecs++; dashEarned += rps;
+      document.getElementById('dtimer').textContent = fmtT(dashSecs);
+      document.getElementById('ses-earn').textContent = dashEarned.toFixed(8) + ' BTC';
+      var eff = 72 + Math.sin(dashSecs / 30) * 8;
+      document.getElementById('effbar').style.width = eff + '%';
+      document.getElementById('effval').textContent = Math.round(eff) + '% effective';
+      document.getElementById('st-today').textContent = (0.015 + dashEarned).toFixed(5);
+    }, 1000);
+  } else {
+    dashMining = false; clearInterval(dashIv); stopHash();
+    document.getElementById('mbdot').style.background = 'var(--t3)';
+    document.getElementById('mbtext').textContent = 'Idle';
+    document.getElementById('mbtext').style.color = 'var(--t3)';
+    document.getElementById('dses-status').textContent = 'Session stopped';
+    document.getElementById('dashash').textContent = 'No active session.';
+    btn.textContent = 'Start Mining Session';
+    if (dashEarned > 0) {
+      var e = dashEarned.toFixed(6);
+      showToast('Session done! Earned ' + e + ' BTC', 'suc');
+      TXNS.unshift({type:'mining',hash:'0x'+Math.random().toString(16).slice(2,8)+'...',btc:'+'+e,usd:'+$'+(dashEarned*BTC_PRICE).toFixed(2),date:'Just now',st:'confirmed'});
+      ACTS.unshift({ic:'M',bg:'rgba(0,212,161,0.15)',t:'Mining Reward',m:'Just now',a:'+$'+(dashEarned*BTC_PRICE).toFixed(2),c:'pos'});
+      initActivities();
+      var filtered = [];
+      for (var i = 0; i < TXNS.length; i++) { if (txFilter === 'all' || TXNS[i].type === txFilter) filtered.push(TXNS[i]); }
+      renderTx(filtered);
+    }
+  }
+}
+
+function updW() {
+  var a = parseFloat(document.getElementById('w-amt').value) || 0;
+  var net = Math.max(0, a - 0.00005);
+  document.getElementById('wd-amt').textContent = a.toFixed(8) + ' BTC';
+  document.getElementById('wd-rcv').textContent = net.toFixed(8) + ' BTC';
+}
+function submitW() {
+  var addr = document.getElementById('w-addr').value.trim();
+  var amt = parseFloat(document.getElementById('w-amt').value);
+  if (!addr || addr.length < 25) { showToast('Enter a valid BTC address.', 'err'); return; }
+  if (!amt || amt < 0.0001) { showToast('Minimum withdrawal is 0.0001 BTC.', 'err'); return; }
+  if (amt > 0.04213) { showToast('Insufficient balance.', 'err'); return; }
+  closeM('withdraw');
+  showToast('Withdrawal submitted! Processing in 30 min.', 'suc');
+  TXNS.unshift({type:'withdrawal',hash:'0x'+Math.random().toString(16).slice(2,8)+'...',btc:'-'+amt.toFixed(5),usd:'-$'+(amt*BTC_PRICE).toFixed(2),date:'Just now',st:'pending'});
+  var filtered = [];
+  for (var i = 0; i < TXNS.length; i++) { if (txFilter === 'all' || TXNS[i].type === txFilter) filtered.push(TXNS[i]); }
+  renderTx(filtered);
+}
+
+function copyRef() {
+  var txt = document.getElementById('reflnk').textContent;
+  if (navigator.clipboard) { navigator.clipboard.writeText(txt).then(function() { showToast('Referral link copied!', 'suc'); }); }
+  else { showToast('Referral link copied!', 'suc'); }
+}
+
+function selUpg(el, name, price) {
+  var cards = document.querySelectorAll('.ppc');
+  for (var i = 0; i < cards.length; i++) cards[i].classList.remove('sel');
+  el.classList.add('sel'); upgradeP = name; upgradePrice = price;
+}
+function upgStep(s) {
+  document.getElementById('upg1').style.display = s === 1 ? 'block' : 'none';
+  document.getElementById('upg2').style.display = s === 2 ? 'block' : 'none';
+  document.getElementById('upg3').style.display = s === 3 ? 'block' : 'none';
+  if (s === 2) { document.getElementById('upg-pname').textContent = upgradeP; document.getElementById('upg-pprice').textContent = upgradePrice + '/mo'; }
+  if (s === 3) { document.getElementById('upg-cname').textContent = upgradeP; showToast('Payment confirmed! ' + upgradeP + ' activated!', 'suc'); }
+}
+function fmtCard(el) { var v = el.value.replace(/\D/g,'').slice(0,16); el.value = v.replace(/(.{4})/g,'$1 ').trim(); }
+function fmtExp(el) { var v = el.value.replace(/\D/g,'').slice(0,4); if(v.length>2) v=v.slice(0,2)+' / '+v.slice(2); el.value=v; }
+
+function open2FA() { openM('twofa'); }
+function otpnxt(el, idx) { if (el.value && idx < 6) { var n = el.parentElement.children[idx]; if (n) n.focus(); } }
+function verify2FA() {
+  var otp = '';
+  var inputs = document.querySelectorAll('.otpin');
+  for (var i = 0; i < inputs.length; i++) otp += inputs[i].value;
+  if (otp.length < 6) { showToast('Enter the full 6-digit code.', 'err'); return; }
+  closeM('twofa'); showToast('2FA enabled! Account fully secured.', 'suc');
+}
+
+function initNotifList() {
+  var ndot = document.getElementById('ndot');
+  if (ndot) ndot.style.display = notifUnread > 0 ? 'block' : 'none';
+  var nlist = document.getElementById('nlist');
+  if (!nlist) return;
+  var html = '';
+  for (var i = 0; i < NOTIFS.length; i++) {
+    var n = NOTIFS[i];
+    html += '<div class="npi" onclick="readN(' + i + ')"><div class="npi-ic" style="background:' + n.bg + '">' + n.ic + '</div><div style="flex:1"><div class="npi-t">' + n.t + '</div><div class="npi-m">' + n.m + '</div></div>' + (n.u ? '<div class="npi-dot"></div>' : '') + '</div>';
+  }
+  nlist.innerHTML = html;
+}
+function toggleNotif() { document.getElementById('npanel').classList.toggle('open'); }
+function readN(i) { NOTIFS[i].u = false; notifUnread = Math.max(0, notifUnread - 1); initNotifList(); }
+function markRead() {
+  for (var i = 0; i < NOTIFS.length; i++) NOTIFS[i].u = false;
+  notifUnread = 0; initNotifList(); showToast('All notifications read.', 'suc');
+}
+document.addEventListener('click', function(e) {
+  var p = document.getElementById('npanel');
+  if (p && !p.contains(e.target) && !e.target.closest('.iconbtn')) p.classList.remove('open');
+});
+
+function startPayCd() {
+  setInterval(function() {
+    nextPaySecs = Math.max(0, nextPaySecs - 1);
+    var h = Math.floor(nextPaySecs / 3600);
+    var m = Math.floor((nextPaySecs % 3600) / 60);
+    var txt = h + 'h ' + m + 'm';
+    var e1 = document.getElementById('next-pay'); if (e1) e1.textContent = txt;
+    var e2 = document.getElementById('w-next'); if (e2) e2.textContent = txt;
+    if (nextPaySecs === 0) { nextPaySecs = 86400; showToast('Payout! +0.01500 BTC credited!', 'suc'); }
+  }, 1000);
+}
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  document.getElementById('chatpanel').classList.toggle('open', chatOpen);
+  if (chatOpen) document.getElementById('chatnot').style.display = 'none';
+}
+function qReply(msg) { addU(msg); setTimeout(function() { botR(msg); }, 900); }
+function sendChat() {
+  var inp = document.getElementById('chatinp');
+  var msg = inp.value.trim(); if (!msg) return;
+  inp.value = ''; addU(msg); setTimeout(function() { botR(msg); }, 1000);
+}
+function addU(msg) {
+  var mc = document.getElementById('chatmsgs');
+  var el = document.createElement('div'); el.className = 'msg msg-u'; el.textContent = msg;
+  mc.appendChild(el); mc.scrollTop = mc.scrollHeight;
+}
+function botR(msg) {
+  var mc = document.getElementById('chatmsgs');
+  var l = msg.toLowerCase();
+  var r = CHATANS.def;
+  if (l.indexOf('withdraw') >= 0) r = CHATANS.withdraw;
+  else if (l.indexOf('refer') >= 0) r = CHATANS.referral;
+  else if (l.indexOf('upgrade') >= 0) r = CHATANS.upgrade;
+  else if (l.indexOf('payout') >= 0 || l.indexOf('earn') >= 0) r = CHATANS.payout;
+  var el = document.createElement('div'); el.className = 'msg msg-b'; el.textContent = r;
+  mc.appendChild(el); mc.scrollTop = mc.scrollHeight;
+}
+
+function toggleFaq(btn) {
+  var item = btn.parentElement;
+  var wasOpen = item.classList.contains('open');
+  var all = document.querySelectorAll('.faqitem');
+  for (var i = 0; i < all.length; i++) all[i].classList.remove('open');
+  if (!wasOpen) item.classList.add('open');
+}
+
+function toggleMob() { document.getElementById('mobmenu').classList.toggle('open'); }
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+var tTimer;
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  clearTimeout(tTimer);
+  t.textContent = msg;
+  t.className = 'toast ' + (type || 'inf');
+  setTimeout(function() { t.classList.add('show'); }, 10);
+  tTimer = setTimeout(function() { t.classList.remove('show'); }, 3800);
+}
+
+function fmtT(s) {
+  var h = Math.floor(s / 3600);
+  var m = Math.floor((s % 3600) / 60);
+  var sec = s % 60;
+  return pad(h) + ':' + pad(m) + ':' + pad(sec);
+}
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+function scrollTop() { window.scrollTo({top:0,behavior:'smooth'}); }
+</script>
+</body>
+</html>
